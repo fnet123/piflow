@@ -1,13 +1,13 @@
 package cn.bigdataflow
 
 import org.apache.spark.sql.Encoder
-import cn.bigdataflow.processors.Processor121
-import cn.bigdataflow.processors.Processor
-import cn.bigdataflow.processors.DoWrite
-import cn.bigdataflow.processors.DoLoad
-import cn.bigdataflow.processors.DoFilter
-import cn.bigdataflow.io.BucketSource
+
 import cn.bigdataflow.io.BucketSink
+import cn.bigdataflow.io.BucketSource
+import cn.bigdataflow.processors.DoFilter
+import cn.bigdataflow.processors.DoLoad
+import cn.bigdataflow.processors.DoWrite
+import cn.bigdataflow.processors.Processor121
 
 /**
  * operator of FlowGraph

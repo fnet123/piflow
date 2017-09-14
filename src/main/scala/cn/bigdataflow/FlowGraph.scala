@@ -7,7 +7,21 @@ import com.google.common.graph.ValueGraphBuilder
 import scala.collection.JavaConversions.asJavaCollection
 import scala.collection.JavaConversions.asScalaSet
 import com.google.common.graph.EndpointPair
-import cn.bigdataflow.processors.Processor
+import cn.bigdataflow.sql.LabledDatasets
+
+trait Processor {
+	def DEFAULT_IN_PORT_NAMES(n: Int): Seq[String] = {
+		(1 to n).map("in:_" + _);
+	}
+
+	def DEFAULT_OUT_PORT_NAMES(n: Int): Seq[String] = {
+		(1 to n).map("out:_" + _);
+	}
+
+	def getInPortNames(): Seq[String];
+	def getOutPortNames(): Seq[String];
+	def performN2N(inputs: LabledDatasets, ctx: RunnerContext): LabledDatasets;
+}
 
 class ProcessorNode(val id: Int, val processor: Processor) {
 }

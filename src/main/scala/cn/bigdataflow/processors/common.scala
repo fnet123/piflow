@@ -9,6 +9,8 @@ import cn.bigdataflow.RunnerContext
 import cn.bigdataflow.io.BucketSink
 import cn.bigdataflow.io.BucketSource
 import cn.bigdataflow.sql.LabledDatasets
+import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang3.ArrayUtils
 
 /**
  * @author bluejoe2008@gmail.com
@@ -46,6 +48,10 @@ case class DoFork[X](conditions: X ⇒ Boolean*) extends Processor12N[X] {
 }
 
 case class DoLoad(sources: BucketSource[_]*) extends Processor02N {
+	override def toString = {
+		val as = ArrayUtils.toString(sources.map(_.toString()).toArray);
+		String.format("%s(%s)", this.getClass.getSimpleName, as.substring(1, as.length() - 1));
+	}
 	def getOutPortNames(): Seq[String] = DEFAULT_OUT_PORT_NAMES(sources.size);
 	override def perform(ctx: RunnerContext): LabledDatasets = {
 		val map = collection.mutable.Map[String, Dataset[Any]]();
@@ -58,6 +64,10 @@ case class DoLoad(sources: BucketSource[_]*) extends Processor02N {
 }
 
 case class DoWrite[X](sinks: BucketSink[X]*) extends Processor120[X] {
+	override def toString = {
+		val as = ArrayUtils.toString(sinks.map(_.toString()).toArray);
+		String.format("%s(%s)", this.getClass.getSimpleName, as.substring(1, as.length() - 1));
+	}
 	override def perform(input: Dataset[X], ctx: RunnerContext) {
 		sinks.foreach(_.consumeDataset(input, ctx));
 	}

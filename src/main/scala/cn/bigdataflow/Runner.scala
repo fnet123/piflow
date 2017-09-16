@@ -2,15 +2,13 @@ package cn.bigdataflow
 
 import java.util.Date
 
-import scala.collection.JavaConversions.asJavaCollection
 import scala.collection.JavaConversions.asScalaSet
 import scala.reflect.ClassTag
 
-import org.apache.spark.sql.Dataset
+import org.apache.log4j.Logger
 import org.apache.spark.sql.SparkSession
 
-import cn.bigdataflow.sql.LabledDatasets
-import org.apache.log4j.Logger
+import cn.bigdataflow.Processor.LabledDatasets
 
 trait Logging {
 	protected val logger = Logger.getLogger(this.getClass);
@@ -18,7 +16,7 @@ trait Logging {
 
 trait RunnerContext {
 	def apply[T](name: String): T;
-	def forType[T: ClassTag]()(implicit m: Manifest[T]): T =
+	def forType[T: ClassTag](implicit m: Manifest[T]): T =
 		apply(m.runtimeClass.getName);
 
 	def update[T](name: String, value: T);
@@ -58,8 +56,8 @@ class SparkRunner(spark: SparkSession, listener: RunningEventListener) extends R
 		//validation
 		validate(flowGraph);
 		val endNodes = flowGraph.graph.nodes().filter(flowGraph.graph.successors(_).isEmpty());
-		val visitedNodes = scala.collection.mutable.Map[Integer, Map[String, Dataset[Any]]]();
-		endNodes.toSeq.map(visitNode(flowGraph, _, visitedNodes));
+		val visitedNodes = scala.collection.mutable.Map[Integer, Map[String, Any]]();
+		endNodes.toSeq.foreach(visitNode(flowGraph, _, visitedNodes));
 	}
 
 	private def visitNode(flow: FlowGraph, nodeId: Integer, visitedNodes: scala.collection.mutable.Map[Integer, LabledDatasets]): LabledDatasets = {
@@ -70,7 +68,7 @@ class SparkRunner(spark: SparkSession, listener: RunningEventListener) extends R
 			val thisNode = flow.node(nodeId);
 			logger.debug(s"running node: $nodeId");
 
-			val inputs = collection.mutable.Map[String, Dataset[Any]]();
+			val inputs = collection.mutable.Map[String, Any]();
 
 			//predecessors
 			val predecessorNodeIds = flow.graph.predecessors(nodeId);

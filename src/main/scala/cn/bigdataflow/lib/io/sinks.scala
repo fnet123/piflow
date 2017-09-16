@@ -1,4 +1,4 @@
-package cn.bigdataflow.io
+package cn.bigdataflow.lib.io
 
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.Encoder
@@ -7,34 +7,20 @@ import scala.collection.mutable.ArrayBuffer
 import scala.reflect.ClassTag
 import cn.bigdataflow.RunnerContext
 import scala.reflect.ManifestFactory.classType
+import org.apache.spark.sql.streaming.StreamingQuery
+import cn.bigdataflow.BatchSink
 
 /**
  * @author bluejoe2008@gmail.com
  */
-trait BucketSource[X] {
-	def createDataset(ctx: RunnerContext): Dataset[X];
-}
-
-trait BucketSink[X] {
-	def consumeDataset(ds: Dataset[X], ctx: RunnerContext);
-}
-
-case class ConsoleSink[T]() extends BucketSink[T] {
+case class ConsoleSink[T]() extends BatchSink[T] {
 	override def toString = this.getClass.getSimpleName;
 	def consumeDataset(ds: Dataset[T], ctx: RunnerContext) = {
 		ds.show();
 	}
 }
 
-case class SeqAsSource[X: Encoder](t: X*) extends BucketSource[X] {
-	override def toString = this.getClass.getSimpleName;
-	def createDataset(ctx: RunnerContext): Dataset[X] = {
-		val spark = ctx.forType[SparkSession]();
-		spark.createDataset(t);
-	}
-}
-
-case class MemorySink[T: ClassTag]() extends BucketSink[T] {
+case class MemorySink[T: ClassTag]() extends BatchSink[T] {
 	override def toString = this.getClass.getSimpleName;
 	val buffer = ArrayBuffer[T]();
 

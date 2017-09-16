@@ -1,21 +1,24 @@
 package cn.bigdataflow;
 
+import java.io.File
+import java.io.FileWriter
+
 import org.apache.spark.sql.SparkSession
+import org.junit.Assert
 import org.junit.Test
 
-import cn.bigdataflow.processors.DoFilter
-import cn.bigdataflow.processors.DoFork
-import cn.bigdataflow.processors.DoLoad
-import cn.bigdataflow.processors.DoMap
-import cn.bigdataflow.processors.DoWrite
-import cn.bigdataflow.processors.DoZip
-import cn.bigdataflow.processors.DoMerge
-import org.junit.Assert
-import cn.bigdataflow.io.SeqAsSource
-import cn.bigdataflow.io.MemorySink
-import cn.bigdataflow.io.ConsoleSink
+import cn.bigdataflow.lib.io.MemorySink
+import cn.bigdataflow.lib.processors.DoFilter
+import cn.bigdataflow.lib.processors.DoFork
+import cn.bigdataflow.lib.processors.DoLoad
+import cn.bigdataflow.lib.processors.DoMap
+import cn.bigdataflow.lib.processors.DoMerge
+import cn.bigdataflow.lib.processors.DoZip
+import cn.bigdataflow.lib.processors.DoWrite
+import cn.bigdataflow.lib.io.SeqAsSource
+import cn.bigdataflow.lib.io.ConsoleSink
 
-class FlowTest {
+class BatchFlowTest {
 	val cronExpr = "*/5 * * * * ";
 	val spark = SparkSession.builder.master("local[4]")
 		.getOrCreate();
@@ -64,6 +67,24 @@ class FlowTest {
 	}
 
 	@Test
+	def testLoadDefinedSource() = {
+		val fg = new FlowGraph();
+		val fw = new FileWriter(new File("./abc.txt"));
+		fw.write("hello\r\nworld");
+		fw.close();
+
+		val node1 = fg.createNode(DoLoad[String]("text", Map("path" -> "./abc.txt")));
+		val mem = MemorySink[String]();
+		val node2 = fg.createNode(DoWrite(mem, ConsoleSink()));
+		fg.link(node1, node2, ("out:_1", "in:_1"));
+		fg.show();
+
+		val runner = Runner.sparkRunner(spark);
+		runner.run(fg);
+		Assert.assertEquals(Seq("hello", "world"), mem.get());
+	}
+
+	@Test
 	def testFlowFork() = {
 		val fg = new FlowGraph();
 		val node1 = fg.createNode(DoLoad(SeqAsSource(1, 2, 3, 4)));
@@ -109,7 +130,8 @@ class FlowTest {
 	@Test
 	def testFlowForkMerge() = {
 		val fg = new FlowGraph();
-		val node1 = fg.createNode(DoLoad(SeqAsSource(1, 2, 3, 4), SeqAsSource("a", "b", "c", "d")));
+		val node1 = fg.createNode(DoLoad(SeqAsSource(1, 2, 3, 4)));
+		val node2 = fg.createNode(DoLoad(SeqAsSource("a", "b", "c", "d")));
 		val node3 = fg.createNode(DoMap[String, String](_.toUpperCase()));
 		//fork
 		val node4 = fg.createNode(DoFork[Int](_ % 2 == 0, _ % 2 == 1));
@@ -122,11 +144,12 @@ class FlowTest {
 		val node8 = fg.createNode(DoWrite(mem, ConsoleSink[String]()));
 		fg.link(node1, node4, ("out:_1", "in:_1"));
 		fg.link(node4, node5, ("out:_1", "in:_1"));
-		fg.link(node1, node3, ("out:_2", "in:_1"));
+		fg.link(node2, node3, ("out:_1", "in:_1"));
 		fg.link(node3, node6, ("out:_1", "in:_1"));
 		fg.link(node5, node7, ("out:_1", "in:_1"));
 		fg.link(node6, node7, ("out:_1", "in:_2"));
 		fg.link(node7, node8, ("out:_1", "in:_1"));
+		//node2 is isolated
 		fg.show();
 
 		val runner = Runner.sparkRunner(spark);

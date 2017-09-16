@@ -1,15 +1,17 @@
 package cn.bigdataflow
 
-import scala.collection.mutable.Map
 import org.apache.spark.sql.Encoder
 import com.google.common.graph.MutableValueGraph
 import com.google.common.graph.ValueGraphBuilder
 import scala.collection.JavaConversions.asJavaCollection
 import scala.collection.JavaConversions.asScalaSet
 import com.google.common.graph.EndpointPair
-import cn.bigdataflow.sql.LabledDatasets
+import org.apache.spark.sql.Dataset
+import cn.bigdataflow.Processor.LabledDatasets
 
-trait Processor {
+object Processor {
+	type LabledDatasets = Map[String, Any];
+
 	def DEFAULT_IN_PORT_NAMES(n: Int): Seq[String] = {
 		(1 to n).map("in:_" + _);
 	}
@@ -17,7 +19,9 @@ trait Processor {
 	def DEFAULT_OUT_PORT_NAMES(n: Int): Seq[String] = {
 		(1 to n).map("out:_" + _);
 	}
+}
 
+trait Processor {
 	def getInPortNames(): Seq[String];
 	def getOutPortNames(): Seq[String];
 	def performN2N(inputs: LabledDatasets, ctx: RunnerContext): LabledDatasets;
@@ -28,7 +32,7 @@ class ProcessorNode(val id: Int, val processor: Processor) {
 
 class FlowGraph {
 	val graph: MutableValueGraph[Integer, (String, String)] = ValueGraphBuilder.directed().build();
-	val nodesMap = Map[Integer, ProcessorNode]();
+	val nodesMap = collection.mutable.Map[Integer, ProcessorNode]();
 	var serialNo = 0;
 
 	def node(id: Integer) = nodesMap(id);

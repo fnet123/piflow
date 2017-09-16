@@ -1,29 +1,30 @@
 package cn.bigdataflow
 
+import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.Encoder
 
-import cn.bigdataflow.io.BucketSink
-import cn.bigdataflow.io.BucketSource
-import cn.bigdataflow.processors.DoFilter
-import cn.bigdataflow.processors.DoLoad
-import cn.bigdataflow.processors.DoWrite
-import cn.bigdataflow.processors.Processor121
+import cn.bigdataflow.lib.processors.DoFilter
+import cn.bigdataflow.lib.processors.DoLoad
+import cn.bigdataflow.lib.processors.DoWrite
+import cn.bigdataflow.lib.processors.Processor121
 
 /**
  * operator of FlowGraph
  */
 class Flow(val flow: FlowGraph, var currentNode: ProcessorNode) {
-	def pipe[X: Encoder, Y: Encoder](transform: Processor121[X, Y], lables: (String, String)): Flow = {
+	def pipe[X, Y](transform: Processor121[X, Y], lables: (String, String)): Flow = {
 		this.append(transform, lables);
 	}
 
-	def write[X: Encoder](sink: BucketSink[X], lables: (String, String)): Flow = {
+	def write[X: Encoder](sink: BatchSink[X], lables: (String, String)): Flow = {
 		this.append(new DoWrite(sink), lables);
 	}
 
 	def fork[X: Encoder](lastEdgeLable: String, filters: (String, X ⇒ Boolean)*): Seq[Flow] = {
-		filters.map(fn ⇒
-			pipe(new DoFilter(fn._2), (lastEdgeLable, fn._1)));
+		filters.map(fn ⇒ {
+			val transform: Processor121[Dataset[X], Dataset[X]] = new DoFilter[X](fn._2);
+			pipe(transform, (lastEdgeLable, fn._1));
+		})
 	}
 
 	def append(processor: Processor, lables: (String, String)): Flow = {
@@ -34,8 +35,8 @@ class Flow(val flow: FlowGraph, var currentNode: ProcessorNode) {
 }
 
 class FlowBuilder(val flow: FlowGraph) {
-	def beginWith[X](source: BucketSource[X]): Flow = {
-		new Flow(flow, flow.createNode(new DoLoad(source)));
+	def beginWith[X: Encoder](source: BatchSource[X]): Flow = {
+		new Flow(flow, flow.createNode(DoLoad[X](source)));
 	}
 
 	def beginWith(processor: Processor): Flow = {

@@ -11,7 +11,6 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.streaming.OutputMode
 
 import cn.bigdataflow.Processor
-import cn.bigdataflow.Processor.LabledDatasets
 import cn.bigdataflow.RunnerContext
 import cn.bigdataflow.BatchSink
 import cn.bigdataflow.BatchSource
@@ -59,8 +58,8 @@ case class DoFork[X](conditions: X ⇒ Boolean*) extends Processor12N[Dataset[X]
 	 */
 	def this(ncopy: Int) = { this((1 to ncopy).map(n ⇒ (m: X) ⇒ true): _*) }
 	override def toString = this.getClass.getSimpleName;
-	def getOutPortNames(): Seq[String] = Processor.DEFAULT_OUT_PORT_NAMES(conditions.size);
-	def perform(input: Dataset[X], ctx: RunnerContext): LabledDatasets = {
+	def getOutPortNames(): Seq[String] = DEFAULT_OUT_PORT_NAMES(conditions.size);
+	def perform(input: Dataset[X], ctx: RunnerContext): Map[String, _] = {
 		val map = collection.mutable.Map[String, Dataset[Any]]();
 		val conditionsMap = getOutPortNames.zip(conditions);
 		conditionsMap.foreach { x ⇒
@@ -120,14 +119,15 @@ case class DoWriteStream[X](queryName: String, format: String, outputMode: Outpu
 		extends Processor120[Dataset[X]] {
 	override def perform(input: Dataset[X], ctx: RunnerContext) {
 		val query = input.writeStream.options(args).format(format).outputMode(outputMode).queryName(queryName).start();
+		ctx(queryName) = query;
 		query.awaitTermination();
 	}
 }
 
 case class DoZip[X: Encoder, Y: Encoder]()(implicit ct: ClassTag[Y], en: Encoder[(X, Y)]) extends ProcessorN21[Dataset[(X, Y)]] {
-	def getInPortNames(): Seq[String] = Processor.DEFAULT_IN_PORT_NAMES(2);
+	def getInPortNames(): Seq[String] = DEFAULT_IN_PORT_NAMES(2);
 
-	def perform(inputs: LabledDatasets, ctx: RunnerContext): Dataset[(X, Y)] = {
+	def perform(inputs: Map[String, _], ctx: RunnerContext): Dataset[(X, Y)] = {
 		val ds1: Dataset[X] = inputs(getInPortNames()(0)).asInstanceOf[Dataset[X]];
 		val ds2: Dataset[Y] = inputs(getInPortNames()(1)).asInstanceOf[Dataset[Y]];
 		ds1.sparkSession.createDataset(ds1.rdd.zip(ds2.rdd));
@@ -135,8 +135,8 @@ case class DoZip[X: Encoder, Y: Encoder]()(implicit ct: ClassTag[Y], en: Encoder
 }
 
 case class DoMerge[X: Encoder]() extends ProcessorN21[Dataset[X]] {
-	def getInPortNames(): Seq[String] = Processor.DEFAULT_IN_PORT_NAMES(2);
-	def perform(inputs: LabledDatasets, ctx: RunnerContext): Dataset[X] = {
+	def getInPortNames(): Seq[String] = DEFAULT_IN_PORT_NAMES(2);
+	def perform(inputs: Map[String, _], ctx: RunnerContext): Dataset[X] = {
 		inputs(getInPortNames()(0)).asInstanceOf[Dataset[X]]
 			.union(inputs(getInPortNames()(1)).asInstanceOf[Dataset[X]]);
 	}

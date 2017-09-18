@@ -1,17 +1,16 @@
 package cn.bigdataflow
 
-import org.apache.spark.sql.Encoder
+import scala.collection.JavaConversions.asScalaSet
+
+
+
+import com.google.common.graph.EndpointPair
 import com.google.common.graph.MutableValueGraph
 import com.google.common.graph.ValueGraphBuilder
-import scala.collection.JavaConversions.asJavaCollection
-import scala.collection.JavaConversions.asScalaSet
-import com.google.common.graph.EndpointPair
-import org.apache.spark.sql.Dataset
-import cn.bigdataflow.Processor.LabledDatasets
 
-object Processor {
-	type LabledDatasets = Map[String, Any];
+import cn.bigdataflow.util.TablePrinter
 
+trait Processor {
 	def DEFAULT_IN_PORT_NAMES(n: Int): Seq[String] = {
 		(1 to n).map("in:_" + _);
 	}
@@ -19,12 +18,10 @@ object Processor {
 	def DEFAULT_OUT_PORT_NAMES(n: Int): Seq[String] = {
 		(1 to n).map("out:_" + _);
 	}
-}
-
-trait Processor {
+	
 	def getInPortNames(): Seq[String];
 	def getOutPortNames(): Seq[String];
-	def performN2N(inputs: LabledDatasets, ctx: RunnerContext): LabledDatasets;
+	def performN2N(inputs: Map[String, _], ctx: RunnerContext): Map[String, _];
 }
 
 class ProcessorNode(val id: Int, val processor: Processor) {

@@ -8,8 +8,6 @@ import scala.reflect.ClassTag
 import org.apache.log4j.Logger
 import org.apache.spark.sql.SparkSession
 
-import cn.bigdataflow.Processor.LabledDatasets
-
 trait Logging {
 	protected val logger = Logger.getLogger(this.getClass);
 }
@@ -30,7 +28,7 @@ class MapAsRunnerContext(map: scala.collection.mutable.Map[String, Any]) extends
 trait Runner {
 	def listener(): RunningEventListener;
 
-	def run(flow: Flow);
+	//def run(flow: Flow);
 	def schedule(flow: Flow, date: Date) {
 	}
 
@@ -38,29 +36,32 @@ trait Runner {
 	}
 }
 
+case class RunnerStatus(ctx: RunnerContext) {
+}
+
 class SparkRunner(spark: SparkSession, listener: RunningEventListener) extends Runner with Logging {
 
 	def listener(): RunningEventListener = listener;
-	val ctx: RunnerContext = new MapAsRunnerContext(scala.collection.mutable.Map[String, Any](classOf[SparkSession].getName -> spark));
 
 	private def validate(flowGraph: FlowGraph) {
 		//ports
 		//no-loop
 	}
 
-	def run(flow: Flow) {
-		run(flow.flow);
-	}
+	def createRunnerContext(): RunnerContext =
+		new MapAsRunnerContext(scala.collection.mutable.Map[String, Any](classOf[SparkSession].getName -> spark));
 
-	def run(flowGraph: FlowGraph) {
+	def run(flowGraph: FlowGraph,ctx: RunnerContext = createRunnerContext()): RunnerStatus = {
 		//validation
 		validate(flowGraph);
 		val endNodes = flowGraph.graph.nodes().filter(flowGraph.graph.successors(_).isEmpty());
 		val visitedNodes = scala.collection.mutable.Map[Integer, Map[String, Any]]();
-		endNodes.toSeq.foreach(visitNode(flowGraph, _, visitedNodes));
+		endNodes.toSeq.foreach(visitNode(flowGraph, _, visitedNodes, ctx));
+
+		RunnerStatus(ctx);
 	}
 
-	private def visitNode(flow: FlowGraph, nodeId: Integer, visitedNodes: scala.collection.mutable.Map[Integer, LabledDatasets]): LabledDatasets = {
+	private def visitNode(flow: FlowGraph, nodeId: Integer, visitedNodes: scala.collection.mutable.Map[Integer, Map[String, _]], ctx: RunnerContext): Map[String, _] = {
 		if (visitedNodes.contains(nodeId)) {
 			visitedNodes(nodeId);
 		}
@@ -74,7 +75,7 @@ class SparkRunner(spark: SparkSession, listener: RunningEventListener) extends R
 			val predecessorNodeIds = flow.graph.predecessors(nodeId);
 			for (predecessorNodeId ← predecessorNodeIds) {
 				val edgeValue = flow.graph.edgeValue(predecessorNodeId, nodeId).get;
-				val outputs = visitNode(flow, predecessorNodeId, visitedNodes);
+				val outputs = visitNode(flow, predecessorNodeId, visitedNodes, ctx);
 				inputs += (edgeValue._2 -> outputs(edgeValue._1));
 			}
 

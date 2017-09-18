@@ -1,9 +1,6 @@
-package cn.bigdataflow;
+package cn.bigdataflow.util
 
 import org.apache.commons.lang.StringUtils
-import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.Encoder
-import scala.reflect.ClassTag
 
 object TablePrinter {
 	def print(columns: Seq[String], data: Seq[Seq[Any]]) = {

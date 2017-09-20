@@ -7,6 +7,16 @@ import scala.reflect.ClassTag
 
 import org.apache.log4j.Logger
 import org.apache.spark.sql.SparkSession
+import org.quartz.impl.StdSchedulerFactory
+import org.quartz.Trigger
+import org.quartz.Job
+import org.quartz.JobBuilder
+import org.quartz.TriggerBuilder
+import org.apache.spark.SparkConf
+import org.apache.spark.serializer.KryoSerializer
+import org.apache.commons.lang.StringUtils
+import java.util.Base64
+import java.nio.ByteBuffer
 
 trait Logging {
 	protected val logger = Logger.getLogger(this.getClass);
@@ -25,40 +35,71 @@ class MapAsRunnerContext(map: scala.collection.mutable.Map[String, Any]) extends
 	def update[T](name: String, value: T) = map(name) = value;
 }
 
-trait Runner {
-	def listener(): RunningEventListener;
+trait ProcessStatus;
 
-	//def run(flow: Flow);
-	def schedule(flow: Flow, date: Date) {
-	}
-
-	def schedule(flow: Flow, cronExpr: String) {
-	}
+trait Process {
+	def parent: Option[Process];
+	def getChildren(): Seq[Process];
+	def getCurrentStatus(): ProcessStatus;
+	def stop();
+	def awaitTermination(timeoutMs: Long)
+	def awaitTermination();
 }
 
-case class RunnerStatus(ctx: RunnerContext) {
+abstract class SingleProcess(runnable: Runnable) extends Process {
+	def parent: Option[Process] = None;
+	def getChildren() = Seq[Process]();
+	def getCurrentStatus(): ProcessStatus;
+	def stop();
+	def awaitTermination(timeoutMs: Long)
+	def awaitTermination();
 }
 
-class SparkRunner(spark: SparkSession, listener: RunningEventListener) extends Runner with Logging {
+class SparkRunner(spark: SparkSession) extends Logging {
 
-	def listener(): RunningEventListener = listener;
+	val scheduler = StdSchedulerFactory.getDefaultScheduler();
 
 	private def validate(flowGraph: FlowGraph) {
 		//ports
 		//no-loop
 	}
 
+abstract	class SimpleJob extends Job {
+
+	}
+
+	def scheduleJob() {
+		val trigger =
+			TriggerBuilder.newTrigger().withIdentity("trigger1", "group1").startNow().build();
+
+		val jobDetail =
+			JobBuilder.newJob(classOf[SimpleJob]).withIdentity("job1", "group1").build();
+
+		scheduler.scheduleJob(jobDetail, trigger);
+	}
+
 	def createRunnerContext(): RunnerContext =
 		new MapAsRunnerContext(scala.collection.mutable.Map[String, Any](classOf[SparkSession].getName -> spark));
 
-	def run(flowGraph: FlowGraph,ctx: RunnerContext = createRunnerContext()): RunnerStatus = {
+	def run(flowGraph: FlowGraph): Process = {
+
 		//validation
 		validate(flowGraph);
-		val endNodes = flowGraph.graph.nodes().filter(flowGraph.graph.successors(_).isEmpty());
-		val visitedNodes = scala.collection.mutable.Map[Integer, Map[String, Any]]();
-		endNodes.toSeq.foreach(visitNode(flowGraph, _, visitedNodes, ctx));
 
-		RunnerStatus(ctx);
+		val endNodes = flowGraph.graph.nodes().filter(flowGraph.graph.successors(_).isEmpty());
+null;
+	}
+
+	def runValidatedFlowGrpah(flowGraph: FlowGraph) {
+		val endNodes = flowGraph.graph.nodes().filter(flowGraph.graph.successors(_).isEmpty());
+new Runnable() {
+			def run() = {
+		val ctx: RunnerContext = createRunnerContext();
+		val visitedNodes = scala.collection.mutable.Map[Integer, Map[String, Any]]();
+				endNodes.toSeq.foreach(visitNode(flowGraph, _, visitedNodes, ctx));
+			}
+		};
+		scheduleJob();
 	}
 
 	private def visitNode(flow: FlowGraph, nodeId: Integer, visitedNodes: scala.collection.mutable.Map[Integer, Map[String, _]], ctx: RunnerContext): Map[String, _] = {
@@ -87,5 +128,5 @@ class SparkRunner(spark: SparkSession, listener: RunningEventListener) extends R
 }
 
 object Runner {
-	def sparkRunner(spark: SparkSession, listener: RunningEventListener = new NullRunningEventListener()) = new SparkRunner(spark, listener) {}
+	def sparkRunner(spark: SparkSession) = new SparkRunner(spark) {}
 }

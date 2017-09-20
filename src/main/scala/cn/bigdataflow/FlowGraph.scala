@@ -2,8 +2,6 @@ package cn.bigdataflow
 
 import scala.collection.JavaConversions.asScalaSet
 
-
-
 import com.google.common.graph.EndpointPair
 import com.google.common.graph.MutableValueGraph
 import com.google.common.graph.ValueGraphBuilder
@@ -18,7 +16,7 @@ trait Processor {
 	def DEFAULT_OUT_PORT_NAMES(n: Int): Seq[String] = {
 		(1 to n).map("out:_" + _);
 	}
-	
+
 	def getInPortNames(): Seq[String];
 	def getOutPortNames(): Seq[String];
 	def performN2N(inputs: Map[String, _], ctx: RunnerContext): Map[String, _];
@@ -48,14 +46,15 @@ class FlowGraph {
 	}
 
 	def show() {
-		val data = graph.edges().toSeq.map { pair: EndpointPair[Integer] ⇒
-			val startNodeId = pair.source();
-			val endNodeId = pair.target();
-			val startNode = node(startNodeId).processor.toString();
-			val endNode = node(endNodeId).processor.toString();
-			val (lable1, lable2) = graph.edgeValue(startNodeId, endNodeId).get;
-			Seq[Any](s"$startNodeId->$endNodeId", s"$startNode", lable1, lable2, s"$endNode");
-		}
+		val data = graph.edges().toSeq
+			.map { pair: EndpointPair[Integer] ⇒
+				val startNodeId = pair.source();
+				val endNodeId = pair.target();
+				val startNode = node(startNodeId).processor.toString();
+				val endNode = node(endNodeId).processor.toString();
+				val (lable1, lable2) = graph.edgeValue(startNodeId, endNodeId).get;
+				Seq[Any](s"$startNodeId->$endNodeId", s"$startNode", lable1, lable2, s"$endNode");
+			}
 
 		TablePrinter.print(Seq("", "source node", "out port", "in port", "target node"), data);
 	}

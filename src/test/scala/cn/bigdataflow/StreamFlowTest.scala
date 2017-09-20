@@ -50,7 +50,7 @@ class StreamFlowTest {
 		val ctx = runner.createRunnerContext();
 		val t = new Thread() {
 			override def run() = {
-				runner.run(fg, ctx);
+				runner.run(fg);
 			}
 		};
 

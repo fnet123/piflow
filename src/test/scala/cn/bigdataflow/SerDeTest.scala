@@ -2,12 +2,12 @@ package cn.bigdataflow;
 
 import org.junit.Test;
 import cn.bigdataflow.util.SerDeUtils
-import cn.bigdataflow.lib.processors.trans.DoLoad
-import cn.bigdataflow.lib.processors.trans.DoWrite
-import cn.bigdataflow.lib.processors.trans.DoMap
-import cn.bigdataflow.lib.io.SeqAsSource
+import cn.bigdataflow.processor.transform.DoLoad
+import cn.bigdataflow.processor.transform.DoWrite
+import cn.bigdataflow.processor.transform.DoMap
+import cn.bigdataflow.io.SeqAsSource
 import org.apache.spark.sql.SparkSession
-import cn.bigdataflow.lib.io.MemorySink
+import cn.bigdataflow.io.MemorySink
 import org.apache.spark.SparkConf
 import org.apache.spark.serializer.KryoSerializer
 import java.nio.ByteBuffer

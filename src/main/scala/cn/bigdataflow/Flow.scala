@@ -3,10 +3,13 @@ package cn.bigdataflow
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.Encoder
 
-import cn.bigdataflow.lib.processors.trans.DoFilter
-import cn.bigdataflow.lib.processors.trans.DoLoad
-import cn.bigdataflow.lib.processors.trans.DoWrite
-import cn.bigdataflow.lib.processors.Processor121
+import cn.bigdataflow.processor.transform.DoFilter
+import cn.bigdataflow.processor.transform.DoLoad
+import cn.bigdataflow.processor.transform.DoWrite
+import cn.bigdataflow.processor.Processor
+import cn.bigdataflow.processor.Processor121
+import cn.bigdataflow.io.BatchSource
+import cn.bigdataflow.io.BatchSink
 
 /**
  * operator of FlowGraph

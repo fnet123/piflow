@@ -1,13 +1,27 @@
-package cn.bigdataflow.lib.processors
+package cn.bigdataflow.processor
 
 import org.apache.spark.sql.Dataset
 
-import cn.bigdataflow.Processor
 import cn.bigdataflow.RunnerContext
 
 /**
  * @author bluejoe2008@gmail.com
  */
+
+trait Processor {
+	def DEFAULT_IN_PORT_NAMES(n: Int): Seq[String] = {
+		(1 to n).map("in:_" + _);
+	}
+
+	def DEFAULT_OUT_PORT_NAMES(n: Int): Seq[String] = {
+		(1 to n).map("out:_" + _);
+	}
+
+	def getInPortNames(): Seq[String];
+	def getOutPortNames(): Seq[String];
+	def performN2N(inputs: Map[String, _], ctx: RunnerContext): Map[String, _];
+}
+
 trait Processor121[X, Y] extends Processor {
 	override def getInPortNames(): Seq[String] = DEFAULT_IN_PORT_NAMES(1);
 	override def getOutPortNames(): Seq[String] = DEFAULT_OUT_PORT_NAMES(1);

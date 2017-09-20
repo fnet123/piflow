@@ -1,7 +1,8 @@
-package cn.bigdataflow
+package cn.bigdataflow.io
 
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.streaming.StreamingQuery
+import cn.bigdataflow.RunnerContext
 
 trait Source[X];
 

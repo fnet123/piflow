@@ -7,16 +7,16 @@ import org.apache.spark.sql.SparkSession
 import org.junit.Assert
 import org.junit.Test
 
-import cn.bigdataflow.lib.io.MemorySink
-import cn.bigdataflow.lib.processors.trans.DoFilter
-import cn.bigdataflow.lib.processors.trans.DoFork
-import cn.bigdataflow.lib.processors.trans.DoLoad
-import cn.bigdataflow.lib.processors.trans.DoMap
-import cn.bigdataflow.lib.processors.trans.DoMerge
-import cn.bigdataflow.lib.processors.trans.DoZip
-import cn.bigdataflow.lib.processors.trans.DoWrite
-import cn.bigdataflow.lib.io.SeqAsSource
-import cn.bigdataflow.lib.io.ConsoleSink
+import cn.bigdataflow.io.ConsoleSink
+import cn.bigdataflow.io.MemorySink
+import cn.bigdataflow.io.SeqAsSource
+import cn.bigdataflow.processor.transform.DoFilter
+import cn.bigdataflow.processor.transform.DoFork
+import cn.bigdataflow.processor.transform.DoLoad
+import cn.bigdataflow.processor.transform.DoMap
+import cn.bigdataflow.processor.transform.DoMerge
+import cn.bigdataflow.processor.transform.DoWrite
+import cn.bigdataflow.processor.transform.DoZip
 
 class BatchFlowTest {
 	val cronExpr = "*/5 * * * * ";

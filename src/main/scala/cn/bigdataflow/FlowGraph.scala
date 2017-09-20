@@ -7,20 +7,7 @@ import com.google.common.graph.MutableValueGraph
 import com.google.common.graph.ValueGraphBuilder
 
 import cn.bigdataflow.util.TablePrinter
-
-trait Processor {
-	def DEFAULT_IN_PORT_NAMES(n: Int): Seq[String] = {
-		(1 to n).map("in:_" + _);
-	}
-
-	def DEFAULT_OUT_PORT_NAMES(n: Int): Seq[String] = {
-		(1 to n).map("out:_" + _);
-	}
-
-	def getInPortNames(): Seq[String];
-	def getOutPortNames(): Seq[String];
-	def performN2N(inputs: Map[String, _], ctx: RunnerContext): Map[String, _];
-}
+import cn.bigdataflow.processor.Processor
 
 class ProcessorNode(val id: Int, val processor: Processor) {
 }

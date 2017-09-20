@@ -2,9 +2,9 @@ package cn.bigdataflow;
 
 import org.junit.Test;
 import cn.bigdataflow.util.SerDeUtils
-import cn.bigdataflow.lib.processors.DoLoad
-import cn.bigdataflow.lib.processors.DoWrite
-import cn.bigdataflow.lib.processors.DoMap
+import cn.bigdataflow.lib.processors.trans.DoLoad
+import cn.bigdataflow.lib.processors.trans.DoWrite
+import cn.bigdataflow.lib.processors.trans.DoMap
 import cn.bigdataflow.lib.io.SeqAsSource
 import org.apache.spark.sql.SparkSession
 import cn.bigdataflow.lib.io.MemorySink

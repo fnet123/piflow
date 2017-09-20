@@ -3,9 +3,9 @@ package cn.bigdataflow
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.Encoder
 
-import cn.bigdataflow.lib.processors.DoFilter
-import cn.bigdataflow.lib.processors.DoLoad
-import cn.bigdataflow.lib.processors.DoWrite
+import cn.bigdataflow.lib.processors.trans.DoFilter
+import cn.bigdataflow.lib.processors.trans.DoLoad
+import cn.bigdataflow.lib.processors.trans.DoWrite
 import cn.bigdataflow.lib.processors.Processor121
 
 /**

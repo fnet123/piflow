@@ -1,7 +1,6 @@
-package cn.bigdataflow.lib.processors
+package cn.bigdataflow.lib.processors.trans
 
 import scala.reflect.ClassTag
-
 import org.apache.commons.lang3.ArrayUtils
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.Encoder
@@ -9,11 +8,16 @@ import org.apache.spark.sql.RelationalGroupedDataset
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.streaming.OutputMode
-
-import cn.bigdataflow.Processor
 import cn.bigdataflow.RunnerContext
 import cn.bigdataflow.BatchSink
 import cn.bigdataflow.BatchSource
+import cn.bigdataflow.lib.processors.Processor021
+import cn.bigdataflow.lib.processors.Processor120
+import cn.bigdataflow.lib.processors.Processor121
+import cn.bigdataflow.lib.processors.Processor12N
+import cn.bigdataflow.lib.processors.ProcessorN21
+import org.apache.spark.sql.Row
+import scala.reflect.ManifestFactory.classType
 
 /**
  * @author bluejoe2008@gmail.com

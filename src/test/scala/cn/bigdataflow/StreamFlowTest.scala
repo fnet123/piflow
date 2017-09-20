@@ -12,11 +12,11 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-import cn.bigdataflow.lib.processors.DoFlatMap
-import cn.bigdataflow.lib.processors.DoLoadStream
-import cn.bigdataflow.lib.processors.DoMap
-import cn.bigdataflow.lib.processors.DoTransform
-import cn.bigdataflow.lib.processors.DoWriteStream
+import cn.bigdataflow.lib.processors.trans.DoFlatMap
+import cn.bigdataflow.lib.processors.trans.DoLoadStream
+import cn.bigdataflow.lib.processors.trans.DoMap
+import cn.bigdataflow.lib.processors.trans.DoTransform
+import cn.bigdataflow.lib.processors.trans.DoWriteStream
 import org.apache.spark.sql.execution.streaming.StreamExecution
 import org.apache.spark.sql.execution.streaming.MemorySink
 import org.junit.Assert

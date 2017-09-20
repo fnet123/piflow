@@ -8,13 +8,13 @@ import org.junit.Assert
 import org.junit.Test
 
 import cn.bigdataflow.lib.io.MemorySink
-import cn.bigdataflow.lib.processors.DoFilter
-import cn.bigdataflow.lib.processors.DoFork
-import cn.bigdataflow.lib.processors.DoLoad
-import cn.bigdataflow.lib.processors.DoMap
-import cn.bigdataflow.lib.processors.DoMerge
-import cn.bigdataflow.lib.processors.DoZip
-import cn.bigdataflow.lib.processors.DoWrite
+import cn.bigdataflow.lib.processors.trans.DoFilter
+import cn.bigdataflow.lib.processors.trans.DoFork
+import cn.bigdataflow.lib.processors.trans.DoLoad
+import cn.bigdataflow.lib.processors.trans.DoMap
+import cn.bigdataflow.lib.processors.trans.DoMerge
+import cn.bigdataflow.lib.processors.trans.DoZip
+import cn.bigdataflow.lib.processors.trans.DoWrite
 import cn.bigdataflow.lib.io.SeqAsSource
 import cn.bigdataflow.lib.io.ConsoleSink
 

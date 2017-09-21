@@ -3,7 +3,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>bigdataflow</groupId>
 	<artifactId>bigdataflow</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.9</version>
+	<packaging>pom</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jetty.version>9.0.0.M0</jetty.version>
@@ -94,4 +95,9 @@
 			</plugin>
 		</plugins>
 	</build>
+	<modules>
+		<module>dataflow-core</module>
+		<module>dataflow-shell</module>
+		<module>dataflow-webui</module>
+	</modules>
 </project>

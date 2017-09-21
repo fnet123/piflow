@@ -60,7 +60,7 @@ class StreamFlowTest {
 
 		val sink = ctx("query1").asInstanceOf[StreamExecution].sink.asInstanceOf[MemorySink];
 		val ds = sink.allData;
-		Assert.assertArrayEquals(Array("HELLO" -> 1, "BYE" -> 1, "WORLD" -> 2).asInstanceOf[Array[Object]], ds.map(row ⇒ (row(0) -> row(1))).toArray.asInstanceOf[Array[Object]]);
+		Assert.assertEquals(Array("HELLO" -> 1, "BYE" -> 1, "WORLD" -> 2).asInstanceOf[Array[Object]], ds.map(row ⇒ (row(0) -> row(1))).toArray.asInstanceOf[Array[Object]]);
 	}
 }
 

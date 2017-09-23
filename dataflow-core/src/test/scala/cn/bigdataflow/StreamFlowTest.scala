@@ -47,7 +47,6 @@ class StreamFlowTest {
 
 		FileUtils.deleteDirectory(new File(s"/tmp/query1"));
 		val runner = Runner.sparkRunner(spark);
-		val ctx = runner.createRunnerContext();
 		val t = new Thread() {
 			override def run() = {
 				runner.run(fg);
@@ -58,6 +57,8 @@ class StreamFlowTest {
 		nc.writeData("hello\r\nworld\r\nbye\r\nworld\r\n");
 		Thread.sleep(10000);
 
+		//FIXME: get ctx from run()
+		val ctx = Map[String, Any]();
 		val sink = ctx("query1").asInstanceOf[StreamExecution].sink.asInstanceOf[MemorySink];
 		val ds = sink.allData;
 		Assert.assertEquals(Array("HELLO" -> 1, "BYE" -> 1, "WORLD" -> 2).asInstanceOf[Array[Object]], ds.map(row ⇒ (row(0) -> row(1))).toArray.asInstanceOf[Array[Object]]);

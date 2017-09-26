@@ -18,7 +18,18 @@ import cn.bigdataflow.JobManager
 import cn.bigdataflow.ScheduledJob
 import org.quartz.impl.matchers.GroupMatcher
 
-class FlowGraphJobManager(scheduler: Scheduler) extends JobManager {
+class FlowGraphJobManager(scheduler: Scheduler, triggerListener: FlowGraphJobTriggerListener) extends JobManager {
+	def getHistoricExecutions() =
+		triggerListener.getHistoricExecutions().map { x ⇒
+			new SimpleJobInstance(x._2);
+		}
+
+	def getHistoricExecutions(jobId: String) = triggerListener.getHistoricExecutions().filter { x ⇒
+		jobId.equals(x._1.getName)
+	}.map { x ⇒
+		new SimpleJobInstance(x._2);
+	}
+
 	def getScheduledJobs(): Seq[ScheduledJob] = {
 		scheduler.getTriggerKeys(GroupMatcher.groupEquals(classOf[FlowGraph].getName)).map { tk: TriggerKey ⇒
 			val trigger = scheduler.getTrigger(tk);

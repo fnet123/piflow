@@ -24,18 +24,19 @@ import org.quartz.TriggerKey
 /**
  * @author bluejoe2008@gmail.com
  */
-class SparkRunner(spark: SparkSession) extends Runner with Logging {
+object SparkRunner extends Runner with Logging {
 	val quartzScheduler = StdSchedulerFactory.getDefaultScheduler();
 	val schedulerListener = new FlowGraphJobSchedulerListener();
 	quartzScheduler.getListenerManager.addSchedulerListener(schedulerListener);
 	//quartzScheduler.getListenerManager.addJobListener(new FlowGraphJobListener());
-	quartzScheduler.getListenerManager.addTriggerListener(new FlowGraphJobTriggerListener());
+	val triggerListener = new FlowGraphJobTriggerListener();
+	quartzScheduler.getListenerManager.addTriggerListener(triggerListener);
 	quartzScheduler.start();
 
 	val jobId = new AtomicInteger(0);
 
 	def getJobManager(): JobManager = {
-		new FlowGraphJobManager(quartzScheduler);
+		new FlowGraphJobManager(quartzScheduler, triggerListener);
 	}
 
 	private def validate(flowGraph: FlowGraph) {

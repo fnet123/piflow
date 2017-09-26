@@ -16,6 +16,7 @@ import org.quartz.TriggerKey
 import org.quartz.TriggerListener
 
 import cn.bigdataflow.Logging
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * @author bluejoe2008@gmail.com
@@ -36,12 +37,31 @@ class FlowGraphJobListener extends JobListener with Logging {
 	}
 }
 
-class FlowGraphJobTriggerListener extends TriggerListener with Logging {
+class FlowGraphJobTriggerListener(maxHistorySize: Int = 10240) extends TriggerListener with Logging {
 	def getName() = this.getClass.getName;
+	var flushCounter = 0;
+	val flushSize = 100;
+	def historicExecutions = ArrayBuffer[(TriggerKey, JobExecutionContext)]();
 
 	def triggerFired(trigger: Trigger, context: JobExecutionContext) = {
 		logger.debug(String.format("job fired: %s, scheduledJob: %s", context.getFireInstanceId, trigger.getKey.getName));
+
+		flushCounter += 1;
+		if (flushCounter >= flushSize) {
+			if (maxHistorySize >= 0 && historicExecutions.size >= maxHistorySize)
+				historicExecutions.synchronized {
+					historicExecutions.trimStart(historicExecutions.size - maxHistorySize);
+				}
+
+			flushCounter = 0;
+		}
+
+		historicExecutions.synchronized {
+			historicExecutions += (trigger.getKey -> context);
+		}
 	}
+
+	def getHistoricExecutions() = historicExecutions.toSeq;
 
 	def vetoJobExecution(trigger: Trigger, context: JobExecutionContext) = {
 		false;

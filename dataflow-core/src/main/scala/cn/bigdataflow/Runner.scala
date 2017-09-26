@@ -32,10 +32,12 @@ trait Runner {
 }
 
 object Runner {
-	def sparkRunner(spark: SparkSession) = new SparkRunner(spark);
+	def sparkRunner(spark: SparkSession) = SparkRunner;
 }
 
 trait JobManager {
+	def getHistoricExecutions(): Seq[JobInstance];
+	def getHistoricExecutions(jobId: String): Seq[JobInstance];
 	def getScheduledJobs(): Seq[ScheduledJob];
 	def getRunningJobs(): Seq[JobInstance];
 	def getRunningJobs(jobId: JobId): Seq[JobInstance];
@@ -49,7 +51,6 @@ trait JobInstance {
 	def getScheduledJob(): ScheduledJob;
 	def getStartTime(): Date;
 	def getRunTime(): Long;
-	def getRefireCount(): Int;
 }
 
 trait ScheduledJob {

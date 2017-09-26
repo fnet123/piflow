@@ -55,7 +55,7 @@ class FlowGraphJobManager(scheduler: Scheduler) extends JobManager {
 case class SimpleJobInstance(ctx: JobExecutionContext) extends JobInstance {
 	def getId(): String = ctx.getFireInstanceId;
 	def getScheduledJob(): SimpleScheduledJob = new SimpleScheduledJob(ctx.getJobDetail, ctx.getTrigger);
-	def getFireTime(): Date = ctx.getFireTime;
+	def getStartTime(): Date = ctx.getFireTime;
 	def getRunTime(): Long = ctx.getJobRunTime;
 	def getRefireCount(): Int = ctx.getRefireCount;
 }

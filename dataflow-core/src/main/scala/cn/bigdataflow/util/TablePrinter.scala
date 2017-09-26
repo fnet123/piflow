@@ -3,17 +3,22 @@ package cn.bigdataflow.util
 import org.apache.commons.lang.StringUtils
 
 object TablePrinter {
-	def print(columns: Seq[String], data: Seq[Seq[Any]]) = {
+	def print(columns: Seq[String], data: Seq[Seq[Any]], nullString: String = "(null)") = {
+		val formatedColumns: Seq[String] = columns.map(x ⇒
+			if (x == null) { nullString } else { x });
+		val formatedData: Seq[Seq[String]] = data.map(_.map(
+			x ⇒ if (x == null) { nullString } else { x.toString }));
+
 		val sb = new StringBuilder
-		val numCols = columns.length
+		val numCols = formatedColumns.length
 
 		// Initialise the width of each column to a minimum value of '3'
 		val colWidths = Array.fill(numCols)(3)
 
 		// Compute the width of each column
-		for (row ← data :+ columns) {
+		for (row ← formatedData :+ formatedColumns) {
 			for ((cell, i) ← row.zipWithIndex) {
-				colWidths(i) = math.max(colWidths(i), cell.toString().length)
+				colWidths(i) = math.max(colWidths(i), cell.length)
 			}
 		}
 
@@ -21,7 +26,7 @@ object TablePrinter {
 		val sep: String = colWidths.map("-" * _).addString(sb, "+", "+", "+\n").toString()
 
 		// column names
-		columns.zipWithIndex.map {
+		formatedColumns.zipWithIndex.map {
 			case (cell, i) ⇒
 				StringUtils.rightPad(cell, colWidths(i))
 		}.addString(sb, "|", "|", "|\n")
@@ -29,10 +34,10 @@ object TablePrinter {
 		sb.append(sep)
 
 		// data
-		data.map {
+		formatedData.map {
 			_.zipWithIndex.map {
 				case (cell, i) ⇒
-					StringUtils.rightPad(cell.toString, colWidths(i))
+					StringUtils.rightPad(cell, colWidths(i))
 			}.addString(sb, "|", "|", "|\n")
 		}
 

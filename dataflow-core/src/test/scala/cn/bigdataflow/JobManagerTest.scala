@@ -1,25 +1,17 @@
 package cn.bigdataflow;
 
-import java.io.File
-import java.io.FileWriter
+import java.util.Date
 
 import org.apache.spark.sql.SparkSession
 import org.junit.Assert
 import org.junit.Test
 
 import cn.bigdataflow.io.ConsoleSink
-import cn.bigdataflow.io.MemorySink
 import cn.bigdataflow.io.SeqAsSource
-import cn.bigdataflow.processor.transform.DoFilter
-import cn.bigdataflow.processor.transform.DoFork
+import cn.bigdataflow.processor.Processor020
 import cn.bigdataflow.processor.transform.DoLoad
 import cn.bigdataflow.processor.transform.DoMap
-import cn.bigdataflow.processor.transform.DoMerge
 import cn.bigdataflow.processor.transform.DoWrite
-import cn.bigdataflow.processor.transform.DoZip
-import cn.bigdataflow.io.SeqAsSource
-import java.util.Date
-import cn.bigdataflow.io.SeqAsSource
 
 class JobManagerTest {
 	val spark = SparkSession.builder.master("local[4]")
@@ -32,27 +24,38 @@ class JobManagerTest {
 		val fg = new FlowGraph();
 		val node1 = fg.createNode(DoLoad(SeqAsSource(1, 2, 3, 4)));
 		val node2 = fg.createNode(DoMap[Int, Int](_ + 1));
-		val mem = ConsoleSink[String]();
-		val node3 = fg.createNode(DoWrite(mem));
+		val node3 = fg.createNode(DoWrite(ConsoleSink[String]()));
+		val node4 = fg.createNode(new Processor020() {
+			override def perform(ctx: RunnerContext) = {
+				Thread.sleep(3000);
+			}
+		});
+
 		fg.link(node1, node2, ("out:_1", "in:_1"));
 		fg.link(node2, node3, ("out:_1", "in:_1"));
+		fg.link(node3, node4, (null, null));
 		fg.show();
 
 		val runner = Runner.sparkRunner(spark);
-
-		val jid1 = runner.run(fg);
-		val jid2 = runner.run(fg, JobScheduler.startNow());
-		val jid3 = runner.run(fg, JobScheduler.startLater(1000));
-		val jid4 = runner.run(fg, JobScheduler.startAt(new Date(System.currentTimeMillis() + 2000)));
-		val jid5 = runner.run(fg, JobScheduler.startLater(1000).repeatWithInterval(1000));
-		val jid6 = runner.run(fg, JobScheduler.startAt(new Date(System.currentTimeMillis() + 2000)).repeatWithInterval(1000));
-		val jid7 = runner.run(fg, JobScheduler.startNow().repeatCronly("*/5 * * * *"));
-
 		val man = runner.getJobManager();
-		val sjs = man.getScheduledJobs();
-		val jobs = man.getRunningJobs();
-		Assert.assertEquals(6, sjs.size);
-		Assert.assertEquals(1, jobs.size);
+
+		Assert.assertEquals(0, man.getScheduledJobs().size);
+		Assert.assertEquals(0, man.getRunningJobs().size);
+
+		runner.run(fg); //await termination
+		runner.run(fg, 2000); //await termination, timeout=2s
+
+		val sj1 = runner.schedule(fg);
+		val sj2 = runner.schedule(fg, Schedule.startNow());
+		val sj3 = runner.schedule(fg, Schedule.startLater(1000));
+		val sj4 = runner.schedule(fg, Schedule.startAt(new Date(System.currentTimeMillis() + 2000)));
+		val sj5 = runner.schedule(fg, Schedule.startLater(1000).repeatWithInterval(1000));
+		val sj6 = runner.schedule(fg, Schedule.startAt(new Date(System.currentTimeMillis() + 2000)).repeatWithInterval(1000));
+		val sj7 = runner.schedule(fg, Schedule.startNow().repeatDaily(13, 0));
+		val sj8 = runner.schedule(fg, Schedule.startNow().repeatCronly("* * * * * ?"));
+
+		Thread.sleep(100000); //0.5s
+		runner.stop();
 	}
 }
 

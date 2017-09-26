@@ -23,7 +23,12 @@ trait RunnerContext {
 
 trait Runner {
 	def getJobManager(): JobManager;
-	def run(flowGraph: FlowGraph, scheduler: JobScheduler = JobScheduler.startNow): JobId;
+	def schedule(flowGraph: FlowGraph, scheduler: Schedule = Schedule.startNow): ScheduledJob;
+	/**
+	 * run a flow graph until termination
+	 */
+	def run(flowGraph: FlowGraph, timeout: Long = 0);
+	def stop();
 }
 
 object Runner {
@@ -42,7 +47,7 @@ trait JobManager {
 trait JobInstance {
 	def getId(): String;
 	def getScheduledJob(): ScheduledJob;
-	def getFireTime(): Date;
+	def getStartTime(): Date;
 	def getRunTime(): Long;
 	def getRefireCount(): Int;
 }

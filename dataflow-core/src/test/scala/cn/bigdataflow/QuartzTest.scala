@@ -8,6 +8,7 @@ import org.quartz.SimpleScheduleBuilder
 import org.quartz.TriggerBuilder
 import org.quartz.impl.StdSchedulerFactory
 import org.quartz.JobBuilder
+import org.quartz.CronScheduleBuilder
 
 class HelloQuartz extends org.quartz.Job {
 	println("=====new instance=====");
@@ -29,9 +30,8 @@ class QuartzTest {
 		//定义一个Trigger
 		val trigger = TriggerBuilder.newTrigger() //.withIdentity("trigger1", "group1") //定义name/group
 			.startNow() //一旦加入scheduler，立即生效
-			.withSchedule(SimpleScheduleBuilder.simpleSchedule() //使用SimpleTrigger
-				.withIntervalInSeconds(1) //每隔一秒执行一次
-				.repeatForever()) //一直执行，奔腾到老不停歇
+			.withSchedule(CronScheduleBuilder.cronSchedule("* * * * * ?") //使用SimpleTrigger
+			) //一直执行，奔腾到老不停歇
 			.build();
 
 		//定义一个JobDetail
@@ -46,6 +46,7 @@ class QuartzTest {
 		scheduler.scheduleJob(job, trigger);
 
 		//启动之
+		println(new Date());
 		scheduler.start();
 
 		//运行一段时间后关闭

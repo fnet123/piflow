@@ -25,31 +25,6 @@ class BatchFlowTest {
 	spark.conf.set("spark.sql.streaming.checkpointLocation", "/tmp/");
 	import spark.implicits._
 
-	/*
-	def testBatchingFlow() {
-		val spark = SparkSession.builder.master("local[4]")
-			.getOrCreate();
-		spark.conf.set("spark.sql.streaming.checkpointLocation", "/tmp/");
-		import spark.implicits._
-
-		val flow1 = Flow.batching();
-		val node = flow1.load(SeqAsSource(1, 2, 3, 4)).pipe(DoMap((x: Int) ⇒ x + 1)).write(ConsoleSink[Int]());
-		val flow2 = Flow.batching();
-		flow2.begin(new MyProcessor(collection.immutable.Map[String, String]()));
-
-		val flow3 = Flow.batching();
-		val Seq(node3, node4) = flow3.load(SeqAsSource(1, 2, 3, 4)).fork[Int](_ % 2 == 0, _ % 2 == 1);
-		node3.write(ConsoleSink[Int]());
-		node4.write(ConsoleSink[Int]());
-
-		val runner = Runner.sparkRunner(spark);
-		runner.run(flow1);
-		runner.schedule(flow2, new Date());
-		runner.schedule(flow1, cronExpr);
-		runner.run(flow3);
-	}
-*/
-
 	@Test
 	def testFlowSequence() = {
 		val fg = new FlowGraph();

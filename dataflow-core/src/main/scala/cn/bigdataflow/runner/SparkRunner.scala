@@ -12,18 +12,26 @@ import org.quartz.TriggerBuilder
 import org.quartz.impl.StdSchedulerFactory
 
 import cn.bigdataflow.FlowGraph
-import cn.bigdataflow.JobId
 import cn.bigdataflow.JobManager
-import cn.bigdataflow.JobScheduler
 import cn.bigdataflow.Logging
 import cn.bigdataflow.Runner
-import cn.bigdataflow.JobScheduler
+import cn.bigdataflow.Schedule
+import cn.bigdataflow.ScheduledJob
+import java.util.concurrent.locks.ReentrantLock
+import java.util.concurrent.locks.Lock
+import org.quartz.TriggerKey
 
 /**
  * @author bluejoe2008@gmail.com
  */
 class SparkRunner(spark: SparkSession) extends Runner with Logging {
 	val quartzScheduler = StdSchedulerFactory.getDefaultScheduler();
+	val schedulerListener = new FlowGraphJobSchedulerListener();
+	quartzScheduler.getListenerManager.addSchedulerListener(schedulerListener);
+	//quartzScheduler.getListenerManager.addJobListener(new FlowGraphJobListener());
+	quartzScheduler.getListenerManager.addTriggerListener(new FlowGraphJobTriggerListener());
+	quartzScheduler.start();
+
 	val jobId = new AtomicInteger(0);
 
 	def getJobManager(): JobManager = {
@@ -35,7 +43,23 @@ class SparkRunner(spark: SparkSession) extends Runner with Logging {
 		//no-loop
 	}
 
-	def run(flowGraph: FlowGraph, scheduler: JobScheduler): JobId = {
+	def stop = {
+		quartzScheduler.shutdown();
+	}
+
+	def run(flowGraph: FlowGraph, timeout: Long = 0) {
+		val sj = schedule(flowGraph).asInstanceOf[SimpleScheduledJob];
+		val key = sj.trigger.getKey;
+		val lock = schedulerListener.getLock(key);
+		lock.synchronized {
+			lock.wait(if (timeout > 0) { timeout } else { 0 });
+		}
+
+		if (timeout > 0 && quartzScheduler.getTrigger(key) != null)
+			quartzScheduler.unscheduleJob(key);
+	}
+
+	def schedule(flowGraph: FlowGraph, scheduler: Schedule): ScheduledJob = {
 		//validation
 		validate(flowGraph);
 
@@ -43,9 +67,11 @@ class SparkRunner(spark: SparkSession) extends Runner with Logging {
 			JobBuilder.newJob(classOf[FlowGraphJob])
 				.build();
 		jobDetail.getJobDataMap.put(classOf[FlowGraph].getName, flowGraph);
+
+		val triggerId = "" + jobId.incrementAndGet();
 		val triggerBuilder = TriggerBuilder
 			.newTrigger()
-			.withIdentity("" + jobId.incrementAndGet(), classOf[FlowGraph].getName);
+			.withIdentity(triggerId, classOf[FlowGraph].getName);
 
 		if (scheduler.scheduleBuilder.isDefined)
 			triggerBuilder.withSchedule(scheduler.scheduleBuilder.get);
@@ -56,12 +82,13 @@ class SparkRunner(spark: SparkSession) extends Runner with Logging {
 			triggerBuilder.startNow();
 
 		val trigger = triggerBuilder.build();
+
 		quartzScheduler.scheduleJob(jobDetail, trigger);
-		new SimpleJobId(jobDetail.getKey, trigger.getKey);
+		new SimpleScheduledJob(jobDetail, trigger);
 	}
 }
 
-class FlowGraphJob extends Job {
+class FlowGraphJob extends Job with Logging {
 	override def execute(ctx: JobExecutionContext) = {
 		val map = ctx.getJobDetail.getJobDataMap;
 		val flowGraph = map(classOf[FlowGraph].getName).asInstanceOf[FlowGraph];

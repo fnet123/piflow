@@ -85,13 +85,13 @@ object DoLoad {
 	}
 }
 
-class DoLoadSource[X](source: BatchSource[X]) extends Processor021[Dataset[X]] {
+case class DoLoadSource[X](source: BatchSource[X]) extends Processor021[Dataset[X]] {
 	override def perform(ctx: RunnerContext): Dataset[X] = {
 		source.createDataset(ctx);
 	}
 }
 
-class DoLoadDefinedSource[X: Encoder](format: String, args: Map[String, String]) extends Processor021[Dataset[X]] {
+case class DoLoadDefinedSource[X: Encoder](format: String, args: Map[String, String]) extends Processor021[Dataset[X]] {
 	override def perform(ctx: RunnerContext): Dataset[X] = {
 		ctx.forType[SparkSession].read.format(format).options(args).load().as[X];
 	}

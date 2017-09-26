@@ -6,13 +6,13 @@ import org.quartz.ScheduleBuilder
 import org.quartz.SimpleScheduleBuilder
 import org.quartz.CronScheduleBuilder
 
-object JobScheduler {
-	def startNow() = new JobScheduler().startNow();
-	def startAt(date: Date) = new JobScheduler().startAt(date);
-	def startLater(delay: Long) = new JobScheduler().startLater(delay);
+object Schedule {
+	def startNow() = new Schedule().startNow();
+	def startAt(date: Date) = new Schedule().startAt(date);
+	def startLater(delay: Long) = new Schedule().startLater(delay);
 }
 
-class JobScheduler() {
+class Schedule() {
 	var scheduleBuilder: Option[ScheduleBuilder[_]] = None;
 	var startTime: Option[Date] = None;
 

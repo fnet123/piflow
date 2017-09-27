@@ -26,18 +26,18 @@ import org.quartz.TriggerKey
  */
 object SparkRunner extends Runner with Logging {
 	val quartzScheduler = StdSchedulerFactory.getDefaultScheduler();
-	val schedulerListener = new FlowGraphJobSchedulerListener();
+	val teg: TriggerExtraGroup = new TriggerExtraGroupImpl();
+	val schedulerListener = new SchedulerListenerImpl(teg);
 	quartzScheduler.getListenerManager.addSchedulerListener(schedulerListener);
 	//quartzScheduler.getListenerManager.addJobListener(new FlowGraphJobListener());
-	val triggerListener = new FlowGraphJobTriggerListener();
+	val triggerListener = new TriggerListenerImpl(teg);
+	val jobManager = new JobManagerImpl(quartzScheduler, teg);
 	quartzScheduler.getListenerManager.addTriggerListener(triggerListener);
 	quartzScheduler.start();
 
 	val jobId = new AtomicInteger(0);
 
-	def getJobManager(): JobManager = {
-		new FlowGraphJobManager(quartzScheduler, triggerListener);
-	}
+	def getJobManager(): JobManager = jobManager;
 
 	private def validate(flowGraph: FlowGraph) {
 		//ports
@@ -49,12 +49,10 @@ object SparkRunner extends Runner with Logging {
 	}
 
 	def run(flowGraph: FlowGraph, timeout: Long = 0) {
-		val sj = schedule(flowGraph).asInstanceOf[SimpleScheduledJob];
+		val sj = schedule(flowGraph).asInstanceOf[ScheduledJobImpl];
 		val key = sj.trigger.getKey;
-		val lock = schedulerListener.getLock(key);
-		lock.synchronized {
-			lock.wait(if (timeout > 0) { timeout } else { 0 });
-		}
+
+		teg.get(key).awaitTermination(if (timeout > 0) { timeout } else { 0 });
 
 		if (timeout > 0 && quartzScheduler.getTrigger(key) != null)
 			quartzScheduler.unscheduleJob(key);
@@ -85,7 +83,7 @@ object SparkRunner extends Runner with Logging {
 		val trigger = triggerBuilder.build();
 
 		quartzScheduler.scheduleJob(jobDetail, trigger);
-		new SimpleScheduledJob(jobDetail, trigger);
+		new ScheduledJobImpl(jobDetail, trigger);
 	}
 }
 
@@ -93,6 +91,6 @@ class FlowGraphJob extends Job with Logging {
 	override def execute(ctx: JobExecutionContext) = {
 		val map = ctx.getJobDetail.getJobDataMap;
 		val flowGraph = map(classOf[FlowGraph].getName).asInstanceOf[FlowGraph];
-		FlowGraphExecutor.executeFlowGraph(flowGraph);
+		JobExecutor.executeFlowGraph(flowGraph);
 	}
 }

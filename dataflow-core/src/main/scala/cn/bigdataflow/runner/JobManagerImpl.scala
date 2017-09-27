@@ -18,29 +18,28 @@ import cn.bigdataflow.JobManager
 import cn.bigdataflow.ScheduledJob
 import org.quartz.impl.matchers.GroupMatcher
 
-class FlowGraphJobManager(scheduler: Scheduler, triggerListener: FlowGraphJobTriggerListener) extends JobManager {
-	def getHistoricExecutions() =
-		triggerListener.getHistoricExecutions().map { x ⇒
-			new SimpleJobInstance(x._2);
-		}
+class JobManagerImpl(scheduler: Scheduler, teg: TriggerExtraGroup) extends JobManager {
+	def getFireCount(jobId: JobId): Int = {
+		teg.get(jobId.asInstanceOf[JobIdImpl].triggerKey).getFireCount();
+	}
 
-	def getHistoricExecutions(jobId: String) = triggerListener.getHistoricExecutions().filter { x ⇒
-		jobId.equals(x._1.getName)
-	}.map { x ⇒
-		new SimpleJobInstance(x._2);
+	def getHistoricExecutions(jobId: JobId) = {
+		teg.get(jobId.asInstanceOf[JobIdImpl].triggerKey).getHistoricExecutions().map {
+			new JobInstanceImpl(_);
+		}
 	}
 
 	def getScheduledJobs(): Seq[ScheduledJob] = {
 		scheduler.getTriggerKeys(GroupMatcher.groupEquals(classOf[FlowGraph].getName)).map { tk: TriggerKey ⇒
 			val trigger = scheduler.getTrigger(tk);
 			val jobDetail = scheduler.getJobDetail(trigger.getJobKey);
-			new SimpleScheduledJob(jobDetail, trigger);
+			new ScheduledJobImpl(jobDetail, trigger);
 		}.toSeq
 	}
 
 	def getRunningJobs(): Seq[JobInstance] = {
 		scheduler.getCurrentlyExecutingJobs.map { ctx ⇒
-			new SimpleJobInstance(ctx);
+			new JobInstanceImpl(ctx);
 		}.toSeq
 	}
 
@@ -51,33 +50,33 @@ class FlowGraphJobManager(scheduler: Scheduler, triggerListener: FlowGraphJobTri
 	}
 
 	def resume(jobId: JobId) = {
-		scheduler.resumeTrigger(jobId.asInstanceOf[SimpleScheduledJob].trigger.getKey);
+		scheduler.resumeTrigger(jobId.asInstanceOf[ScheduledJobImpl].trigger.getKey);
 	}
 
 	def pause(jobId: JobId) = {
-		scheduler.pauseTrigger(jobId.asInstanceOf[SimpleScheduledJob].trigger.getKey);
+		scheduler.pauseTrigger(jobId.asInstanceOf[ScheduledJobImpl].trigger.getKey);
 	}
 
 	def stop(jobId: JobId) = {
-		scheduler.unscheduleJob(jobId.asInstanceOf[SimpleScheduledJob].trigger.getKey);
+		scheduler.unscheduleJob(jobId.asInstanceOf[ScheduledJobImpl].trigger.getKey);
 	}
 }
 
-case class SimpleJobInstance(ctx: JobExecutionContext) extends JobInstance {
+case class JobInstanceImpl(ctx: JobExecutionContext) extends JobInstance {
 	def getId(): String = ctx.getFireInstanceId;
-	def getScheduledJob(): SimpleScheduledJob = new SimpleScheduledJob(ctx.getJobDetail, ctx.getTrigger);
+	def getScheduledJob(): ScheduledJobImpl = new ScheduledJobImpl(ctx.getJobDetail, ctx.getTrigger);
 	def getStartTime(): Date = ctx.getFireTime;
 	def getRunTime(): Long = ctx.getJobRunTime;
 	def getRefireCount(): Int = ctx.getRefireCount;
 }
 
-case class SimpleJobId(jobDetailKey: JobKey, triggerKey: TriggerKey) extends JobId {
+case class JobIdImpl(jobDetailKey: JobKey, triggerKey: TriggerKey) extends JobId {
 	def getId = triggerKey.getName;
 }
 
-case class SimpleScheduledJob(jobDetail: JobDetail, trigger: Trigger) extends ScheduledJob {
+case class ScheduledJobImpl(jobDetail: JobDetail, trigger: Trigger) extends ScheduledJob {
 	def getFlowGraph(): FlowGraph = jobDetail.getJobDataMap().get(classOf[FlowGraph].getName).asInstanceOf[FlowGraph];
-	def getId(): SimpleJobId = new SimpleJobId(jobDetail.getKey, trigger.getKey);
+	def getId(): JobIdImpl = new JobIdImpl(jobDetail.getKey, trigger.getKey);
 	def getNextFireTime(): Date = trigger.getNextFireTime;
 	def getStartTime(): Date = trigger.getStartTime;
 	def getEndTime(): Date = trigger.getStartTime;

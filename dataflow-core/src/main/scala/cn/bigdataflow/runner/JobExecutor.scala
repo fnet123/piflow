@@ -14,7 +14,7 @@ class MapAsRunnerContext(map: scala.collection.mutable.Map[String, Any]) extends
 	def update[T](name: String, value: T) = map(name) = value;
 }
 
-object FlowGraphExecutor extends Logging {
+object JobExecutor extends Logging {
 	lazy val spark = SparkSession.builder.getOrCreate();
 	private def createRunnerContext(): RunnerContext =
 		new MapAsRunnerContext(scala.collection.mutable.Map[String, Any](classOf[SparkSession].getName -> spark));

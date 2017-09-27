@@ -6,6 +6,7 @@ object PRELOAD_CODES {
 	import org.apache.spark.sql._
 	import cn.bigdataflow._
 	import cn.bigdataflow.shell._
+	import cn.bigdataflow.shell.Cmd._
 
 	implicit val spark = SparkSession.builder.master("local[4]")
 		.getOrCreate();

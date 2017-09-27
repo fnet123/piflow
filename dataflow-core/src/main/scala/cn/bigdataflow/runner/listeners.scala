@@ -1,8 +1,5 @@
 package cn.bigdataflow.runner
 
-import java.util.concurrent.locks.Lock
-import java.util.concurrent.locks.ReentrantLock
-
 import org.quartz.JobDetail
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
@@ -16,12 +13,11 @@ import org.quartz.TriggerKey
 import org.quartz.TriggerListener
 
 import cn.bigdataflow.Logging
-import scala.collection.mutable.ArrayBuffer
 
 /**
  * @author bluejoe2008@gmail.com
  */
-class FlowGraphJobListener extends JobListener with Logging {
+class JobListenerImpl() extends JobListener with Logging {
 	def getName() = this.getClass.getName;
 
 	def jobToBeExecuted(context: JobExecutionContext) {
@@ -37,31 +33,12 @@ class FlowGraphJobListener extends JobListener with Logging {
 	}
 }
 
-class FlowGraphJobTriggerListener(maxHistorySize: Int = 10240) extends TriggerListener with Logging {
+class TriggerListenerImpl(teg: TriggerExtraGroup) extends TriggerListener with Logging {
 	def getName() = this.getClass.getName;
-	var flushCounter = 0;
-	val flushSize = 100;
-	def historicExecutions = ArrayBuffer[(TriggerKey, JobExecutionContext)]();
-
 	def triggerFired(trigger: Trigger, context: JobExecutionContext) = {
+		teg.get(trigger.getKey).increaseFireCount();
 		logger.debug(String.format("job fired: %s, scheduledJob: %s", context.getFireInstanceId, trigger.getKey.getName));
-
-		flushCounter += 1;
-		if (flushCounter >= flushSize) {
-			if (maxHistorySize >= 0 && historicExecutions.size >= maxHistorySize)
-				historicExecutions.synchronized {
-					historicExecutions.trimStart(historicExecutions.size - maxHistorySize);
-				}
-
-			flushCounter = 0;
-		}
-
-		historicExecutions.synchronized {
-			historicExecutions += (trigger.getKey -> context);
-		}
 	}
-
-	def getHistoricExecutions() = historicExecutions.toSeq;
 
 	def vetoJobExecution(trigger: Trigger, context: JobExecutionContext) = {
 		false;
@@ -72,22 +49,15 @@ class FlowGraphJobTriggerListener(maxHistorySize: Int = 10240) extends TriggerLi
 
 	def triggerComplete(trigger: Trigger, context: JobExecutionContext,
 		triggerInstructionCode: CompletedExecutionInstruction) {
+		teg.get(trigger.getKey).appendExecution(context);
 		logger.debug(String.format("job completed: %s, scheduledJob: %s", context.getFireInstanceId, trigger.getKey.getName));
 	}
 }
 
-class FlowGraphJobSchedulerListener() extends SchedulerListener with Logging {
-
-	val jobLocks = collection.mutable.Map[String, Object]();
-
-	def getLock(triggerKey: TriggerKey) = {
-		jobLocks(triggerKey.getName);
-	}
-
+class SchedulerListenerImpl(teg: TriggerExtraGroup) extends SchedulerListener with Logging {
 	def jobScheduled(trigger: Trigger) {
 		logger.debug(String.format("job scheduled: %s", trigger.getKey.getName));
-		val lock = new Object();
-		jobLocks(trigger.getKey.getName) = new Object;
+		teg.login(trigger.getKey);
 	}
 
 	def jobUnscheduled(triggerKey: TriggerKey) {
@@ -96,10 +66,9 @@ class FlowGraphJobSchedulerListener() extends SchedulerListener with Logging {
 
 	def triggerFinalized(trigger: Trigger) {
 		logger.debug(String.format("job finalized: %s", trigger.getKey.getName));
-		val lock = jobLocks(trigger.getKey.getName);
-		lock.synchronized {
-			lock.notify();
-		}
+		teg.get(trigger.getKey).notifyTermination();
+		//do not logout: historic records
+		//teg.logout(trigger.getKey);
 	}
 
 	def triggerPaused(triggerKey: TriggerKey) {}

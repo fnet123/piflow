@@ -2,10 +2,11 @@ package cn.bigdataflow.shell
 
 import java.util.Date
 
+import cn.bigdataflow.FlowGraph
 import cn.bigdataflow.Runner
 import cn.bigdataflow.Schedule
+import cn.bigdataflow.ScheduledJob
 import cn.bigdataflow.dsl.PipedProcessorNode
-import cn.bigdataflow.FlowGraph
 
 /**
  * @author bluejoe2008@gmail.com
@@ -14,27 +15,39 @@ import cn.bigdataflow.FlowGraph
 class RunnableFlowGraph(flowGraph: FlowGraph)(implicit runner: Runner) {
 	def this(node: PipedProcessorNode)(implicit runner: Runner) = this(node.flowGraph)(runner);
 
-	def !() = {
+	def !() {
 		runner.run(flowGraph);
 	}
 
-	def &() = {
-		runner.schedule(flowGraph);
+	def &() {
+		val job = runner.schedule(flowGraph);
+		val jobId = job.getId().getId();
+		println(s"job scheduled: id=$jobId");
 	}
 
-	def &(date: Date) = {
-		runner.schedule(flowGraph, Schedule.startAt(date));
+	def !@(date: Date) = {
+		val job = runner.schedule(flowGraph, Schedule.startAt(date));
+		printScheduledJobInfo(job);
 	}
 
-	def &(schedule: Schedule) = {
-		runner.schedule(flowGraph, schedule);
+	def !@(schedule: Schedule) = {
+		val job = runner.schedule(flowGraph, schedule);
+		printScheduledJobInfo(job);
 	}
 
-	def &(cronExpression: String) = {
-		runner.schedule(flowGraph, Schedule.startNow().repeatCronly(cronExpression));
+	def !@(cronExpression: String) = {
+		val job = runner.schedule(flowGraph, Schedule.startNow().repeatCronly(cronExpression));
+		printScheduledJobInfo(job);
+	}
+
+	private def printScheduledJobInfo(job: ScheduledJob) = {
+		val jobId = job.getId().getId();
+		val nftime = job.getNextFireTime();
+		println(s"job scheduled: id=$jobId, next fired time=$nftime");
 	}
 
 	def &(delay: Long) = {
-		runner.schedule(flowGraph, Schedule.startLater(delay));
+		val job = runner.schedule(flowGraph, Schedule.startLater(delay));
+		printScheduledJobInfo(job);
 	}
 }

@@ -1,4 +1,4 @@
-package cn.bigdataflow.pipe
+package cn.bigdataflow.dsl
 
 import cn.bigdataflow.io.BatchSink
 import cn.bigdataflow.ProcessorNode
@@ -9,6 +9,7 @@ import org.apache.spark.sql.Encoder
 import cn.bigdataflow.Runner
 import java.util.Date
 import cn.bigdataflow.Schedule
+import cn.bigdataflow.processor.transform.DoWrite
 
 /**
  * @author bluejoe2008@gmail.com
@@ -26,25 +27,5 @@ class PipedProcessorNode(val flowGraph: FlowGraph, val currentNode: ProcessorNod
 
 	def >>[T: Encoder](sink: BatchSink[T]): PipedProcessorNode = {
 		>(DoWrite[T](sink));
-	}
-
-	def !()(implicit runner: Runner) = {
-		runner.run(flowGraph);
-	}
-
-	def !@(date: Date)(implicit runner: Runner) = {
-		runner.schedule(flowGraph, Schedule.startAt(date));
-	}
-
-	def !@(schedule: Schedule)(implicit runner: Runner) = {
-		runner.schedule(flowGraph, schedule);
-	}
-
-	def !@(cronExpression: String)(implicit runner: Runner) = {
-		runner.schedule(flowGraph, Schedule.startNow().repeatCronly(cronExpression));
-	}
-
-	def !@(delay: Long)(implicit runner: Runner) = {
-		runner.schedule(flowGraph, Schedule.startLater(delay));
 	}
 }

@@ -1,19 +1,13 @@
-package cn.bigdataflow.pipe
+package cn.bigdataflow
 
 import org.apache.spark.sql.Encoder
 
-import cn.bigdataflow.FlowGraph
-import cn.bigdataflow.ProcessorNode
-import cn.bigdataflow.io.BatchSink
 import cn.bigdataflow.io.BatchSource
+import cn.bigdataflow.dsl.PipedProcessorNode
 import cn.bigdataflow.processor.Processor
 import cn.bigdataflow.processor.transform.DoLoad
-import cn.bigdataflow.processor.transform.DoWrite
-import cn.bigdataflow.Runner
-import java.util.Date
-import cn.bigdataflow.Schedule
 
-object Conversions {
+package object dsl {
 	implicit def piped[T: Encoder](source: BatchSource[T]): PipedProcessorNode = {
 		piped(DoLoad(source));
 	}
@@ -24,5 +18,5 @@ object Conversions {
 		new PipedProcessorNode(flowGraph, currentNode);
 	}
 
-	implicit def toGraph(node: PipedProcessorNode) = node.flowGraph;
+	implicit def toGraph(node: PipedProcessorNode): FlowGraph = node.flowGraph;
 }

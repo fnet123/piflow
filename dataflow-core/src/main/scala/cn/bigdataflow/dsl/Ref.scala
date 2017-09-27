@@ -1,4 +1,4 @@
-package cn.bigdataflow.pipe
+package cn.bigdataflow.dsl
 
 /**
  * @author bluejoe2008@gmail.com

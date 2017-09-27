@@ -17,13 +17,11 @@ import cn.bigdataflow.processor.transform.DoMap
 import cn.bigdataflow.processor.transform.DoMerge
 import cn.bigdataflow.processor.transform.DoWrite
 import cn.bigdataflow.processor.transform.DoZip
-import cn.bigdataflow.pipe.Conversions._
-import cn.bigdataflow.pipe.PipedProcessorNode
-import cn.bigdataflow.pipe.Ref
+import cn.bigdataflow.dsl._
 import java.util.Date
 import cn.bigdataflow.io.MemorySink
 
-class PipeTest {
+class DslTest {
 	val spark = SparkSession.builder.master("local[4]")
 		.getOrCreate();
 	spark.conf.set("spark.sql.streaming.checkpointLocation", "/tmp/");

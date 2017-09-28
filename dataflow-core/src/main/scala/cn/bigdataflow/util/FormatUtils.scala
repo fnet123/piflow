@@ -1,9 +1,18 @@
 package cn.bigdataflow.util
 
+import java.text.SimpleDateFormat
+import java.util.Date
 import org.apache.commons.lang.StringUtils
 
-object TablePrinter {
-	def print(columns: Seq[String], data: Seq[Seq[Any]], nullString: String = "(null)") = {
+object FormatUtils {
+	def formatDate(date: Date): String = {
+		if (date == null)
+			null;
+		else
+			new SimpleDateFormat("yyyy-MM-dd HH:mm:SS").format(date);
+	}
+
+	def printTable(columns: Seq[String], data: Seq[Seq[Any]], nullString: String = "(null)") = {
 		val formatedColumns: Seq[String] = columns.map(x ⇒
 			if (x == null) { nullString } else { x });
 		val formatedData: Seq[Seq[String]] = data.map(_.map(

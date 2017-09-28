@@ -6,8 +6,8 @@ import com.google.common.graph.EndpointPair
 import com.google.common.graph.MutableValueGraph
 import com.google.common.graph.ValueGraphBuilder
 
-import cn.bigdataflow.util.TablePrinter
 import cn.bigdataflow.processor.Processor
+import cn.bigdataflow.util.FormatUtils
 
 class ProcessorNode(val id: Int, val processor: Processor) {
 }
@@ -43,6 +43,6 @@ class FlowGraph {
 				Seq[Any](s"$startNodeId->$endNodeId", s"$startNode", lable1, lable2, s"$endNode");
 			}
 
-		TablePrinter.print(Seq("", "source node", "out port", "in port", "target node"), data);
+		FormatUtils.printTable(Seq("", "source node", "out port", "in port", "target node"), data);
 	}
 }

@@ -35,6 +35,7 @@ object SparkRunner extends Runner with Logging {
 	quartzScheduler.getListenerManager.addTriggerListener(triggerListener);
 	quartzScheduler.start();
 
+	//val startTime = System.currentTimeMillis() / 1000;
 	val jobId = new AtomicInteger(0);
 
 	def getJobManager(): JobManager = jobManager;
@@ -45,10 +46,13 @@ object SparkRunner extends Runner with Logging {
 	}
 
 	def stop = {
+		if (!jobManager.getScheduledJobs().isEmpty)
+			logger.warn("Runner is to be shutdown, while there are running jobs!");
+
 		quartzScheduler.shutdown();
 	}
 
-	def run(flowGraph: FlowGraph, timeout: Long = 0) {
+	def run(flowGraph: FlowGraph, timeout: Long = 0): ScheduledJob = {
 		val sj = schedule(flowGraph).asInstanceOf[ScheduledJobImpl];
 		val key = sj.trigger.getKey;
 
@@ -56,6 +60,8 @@ object SparkRunner extends Runner with Logging {
 
 		if (timeout > 0 && quartzScheduler.getTrigger(key) != null)
 			quartzScheduler.unscheduleJob(key);
+
+		sj;
 	}
 
 	def schedule(flowGraph: FlowGraph, scheduler: Schedule): ScheduledJob = {

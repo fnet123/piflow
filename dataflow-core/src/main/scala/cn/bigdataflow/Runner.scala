@@ -27,7 +27,7 @@ trait Runner {
 	/**
 	 * run a flow graph until termination
 	 */
-	def run(flowGraph: FlowGraph, timeout: Long = 0);
+	def run(flowGraph: FlowGraph, timeout: Long = 0): ScheduledJob;
 	def stop();
 }
 
@@ -36,14 +36,15 @@ object Runner {
 }
 
 trait JobManager {
-	def getFireCount(jobId: JobId): Int;
-	def getHistoricExecutions(jobId: JobId): Seq[JobInstance];
+	def exists(jobId: String): Boolean;
+	def getFireCount(jobId: String): Int;
+	def getHistoricExecutions(jobId: String): Seq[JobInstance];
 	def getScheduledJobs(): Seq[ScheduledJob];
 	def getRunningJobs(): Seq[JobInstance];
-	def getRunningJobs(jobId: JobId): Seq[JobInstance];
-	def resume(jobId: JobId);
-	def pause(jobId: JobId);
-	def stop(jobId: JobId);
+	def getRunningJobs(jobId: String): Seq[JobInstance];
+	def resume(jobId: String);
+	def pause(jobId: String);
+	def stop(jobId: String);
 }
 
 trait JobInstance {
@@ -55,13 +56,9 @@ trait JobInstance {
 
 trait ScheduledJob {
 	def getFlowGraph(): FlowGraph;
-	def getId(): JobId;
+	def getId(): String;
 	def getNextFireTime(): Date;
 	def getStartTime(): Date;
 	def getEndTime(): Date;
 	def getPreviousFireTime(): Date;
-}
-
-trait JobId {
-	def getId(): String;
 }

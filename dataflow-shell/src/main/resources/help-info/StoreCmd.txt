@@ -1,0 +1,3 @@
+usage of store:
+  store load flow <name>		-loads a stored flow graph
+  store save <flow> as <name>	-saves a flow graph

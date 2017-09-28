@@ -1,0 +1,9 @@
+usage of jobs:
+  jobs list				-lists all running jobs
+  jobs list <jobId>		-lists all running jobs launched by a scheduled job
+  jobs slist			-lists all scheduled jobs
+  jobs hist				-lists all historic executions
+  jobs hist <jobId>		-lists all historic executions launched by a scheduled job
+  jobs kill <jobId>		-stops a scheduled job with all running instances
+  jobs pause <jobId>	-pauses a scheduled job with all running instances
+  jobs resume <jobId>	-resumes a scheduled job with all running instances

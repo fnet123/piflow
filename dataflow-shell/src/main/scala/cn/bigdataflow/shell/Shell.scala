@@ -1,11 +1,12 @@
 package cn.bigdataflow.shell
 
 import scala.tools.nsc.Settings
-import scala.tools.nsc.interpreter._
-import org.apache.commons.io.IOUtils
+import scala.tools.nsc.interpreter.ILoop
 import scala.xml.XML
+
+import org.apache.commons.io.IOUtils
+import javax.script.ScriptContext
 import cn.bigdataflow.Runner
-import org.apache.spark.sql.SparkSession
 
 class Shell {
 	lazy val properties = {
@@ -20,7 +21,7 @@ class Shell {
 	}
 
 	def run() {
-		val repl = new ILoop {
+		val repl: ILoop = new ILoop {
 			override def createInterpreter() = {
 				super.createInterpreter();
 				val text = IOUtils.toString(this.getClass.getResource("/predefined.scala").openStream());
@@ -29,7 +30,6 @@ class Shell {
 					//intp.bind("jobs", new cn.bigdataflow.shell.cmd.JobCmd(runner));
 					//intp.bind("store", new cn.bigdataflow.shell.cmd.StoreCmd(runner));
 				}
-				intp.quietRun("import spark.implicits._;");
 			}
 
 			override def printWelcome(): Unit = {
@@ -47,11 +47,7 @@ class Shell {
 		settings.usejavacp.value = true;
 		settings.debug.value = false;
 		repl.process(settings);
-
-		//FIXME: do not stop!!
-		val spark = SparkSession.builder.master("local[4]")
-			.getOrCreate();
-		val runner = Runner.sparkRunner(spark);
-		runner.stop();
+		//FIXME: do not stop!!		
+		Runner.sparkRunner(null).stop();
 	}
 }

@@ -35,7 +35,6 @@ object SparkRunner extends Runner with Logging {
 	quartzScheduler.getListenerManager.addTriggerListener(triggerListener);
 	quartzScheduler.start();
 
-	//val startTime = System.currentTimeMillis() / 1000;
 	val jobId = new AtomicInteger(0);
 
 	def getJobManager(): JobManager = jobManager;

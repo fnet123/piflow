@@ -17,6 +17,7 @@ import cn.bigdataflow.processor.transform.DoMap
 import cn.bigdataflow.processor.transform.DoMerge
 import cn.bigdataflow.processor.transform.DoWrite
 import cn.bigdataflow.processor.transform.DoZip
+import org.apache.spark.sql.Row
 
 class BatchFlowTest {
 	val cronExpr = "*/5 * * * * ";
@@ -30,7 +31,7 @@ class BatchFlowTest {
 		val fg = new FlowGraph();
 		val node1 = fg.createNode(DoLoad(SeqAsSource(1, 2, 3, 4)));
 		val node2 = fg.createNode(DoMap[Int, Int](_ + 1));
-		val mem = MemorySink[String]();
+		val mem = MemorySink();
 		val node3 = fg.createNode(DoWrite(mem));
 		fg.link(node1, node2, ("out:_1", "in:_1"));
 		fg.link(node2, node3, ("out:_1", "in:_1"));
@@ -48,15 +49,15 @@ class BatchFlowTest {
 		fw.write("hello\r\nworld");
 		fw.close();
 
-		val node1 = fg.createNode(DoLoad[String]("text", Map("path" -> "./abc.txt")));
-		val mem = MemorySink[String]();
+		val node1 = fg.createNode(DoLoad("text", Map("path" -> "./abc.txt")));
+		val mem = MemorySink();
 		val node2 = fg.createNode(DoWrite(mem, ConsoleSink()));
 		fg.link(node1, node2, ("out:_1", "in:_1"));
 		fg.show();
 
 		val runner = Runner.sparkRunner(spark);
 		runner.run(fg);
-		Assert.assertEquals(Seq("hello", "world"), mem.get());
+		Assert.assertEquals(Seq("hello", "world"), mem.get().map { _.asInstanceOf[Row](0) });
 	}
 
 	@Test
@@ -64,9 +65,9 @@ class BatchFlowTest {
 		val fg = new FlowGraph();
 		val node1 = fg.createNode(DoLoad(SeqAsSource(1, 2, 3, 4)));
 		val node2 = fg.createNode(DoFork[Int](_ % 2 == 0, _ % 2 == 1));
-		val mem1 = MemorySink[String]();
+		val mem1 = MemorySink();
 		val node3 = fg.createNode(DoWrite(mem1));
-		val mem2 = MemorySink[String]();
+		val mem2 = MemorySink();
 		val node4 = fg.createNode(DoWrite(mem2));
 		fg.link(node1, node2, ("out:_1", "in:_1"));
 		fg.link(node2, node3, ("out:_1", "in:_1"));
@@ -88,8 +89,8 @@ class BatchFlowTest {
 		val node4 = fg.createNode(DoMap[String, String](_.toUpperCase()));
 		//merge
 		val node5 = fg.createNode(DoZip[Int, String]());
-		val mem = MemorySink[String]();
-		val node6 = fg.createNode(DoWrite(mem, ConsoleSink[String]()));
+		val mem = MemorySink();
+		val node6 = fg.createNode(DoWrite(mem, ConsoleSink()));
 		fg.link(node1, node3, ("out:_1", "in:_1"));
 		fg.link(node2, node4, ("out:_1", "in:_1"));
 		fg.link(node3, node5, ("out:_1", "in:_1"));
@@ -115,8 +116,8 @@ class BatchFlowTest {
 		val node6 = fg.createNode(DoFilter[String](_.charAt(0) <= 'B'));
 		//merge
 		val node7 = fg.createNode(DoMerge[String]());
-		val mem = MemorySink[String]();
-		val node8 = fg.createNode(DoWrite(mem, ConsoleSink[String]()));
+		val mem = MemorySink();
+		val node8 = fg.createNode(DoWrite(mem, ConsoleSink()));
 		fg.link(node1, node4, ("out:_1", "in:_1"));
 		fg.link(node4, node5, ("out:_1", "in:_1"));
 		fg.link(node2, node3, ("out:_1", "in:_1"));

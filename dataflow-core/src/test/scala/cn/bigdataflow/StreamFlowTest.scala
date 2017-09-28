@@ -34,7 +34,7 @@ class StreamFlowTest {
 	@Test
 	def testFlowSequence() = {
 		val fg = new FlowGraph();
-		val node1 = fg.createNode(DoLoadStream[String]("socket", Map[String, String]("host" -> "localhost", "port" -> "9999")));
+		val node1 = fg.createNode(DoLoadStream("socket", Map[String, String]("host" -> "localhost", "port" -> "9999")));
 		val node2 = fg.createNode(DoMap[String, String](_.toUpperCase()));
 		val node3 = fg.createNode(DoFlatMap[String, String](_.split(" ")));
 		val node4 = fg.createNode(DoTransform[String, Row](_.groupBy("value").count));

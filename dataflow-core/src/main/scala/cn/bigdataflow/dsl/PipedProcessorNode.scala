@@ -1,14 +1,9 @@
 package cn.bigdataflow.dsl
 
-import cn.bigdataflow.io.BatchSink
-import cn.bigdataflow.ProcessorNode
-import cn.bigdataflow.processor.transform.DoWrite
 import cn.bigdataflow.FlowGraph
+import cn.bigdataflow.ProcessorNode
+import cn.bigdataflow.io.BatchSink
 import cn.bigdataflow.processor.Processor
-import org.apache.spark.sql.Encoder
-import cn.bigdataflow.Runner
-import java.util.Date
-import cn.bigdataflow.Schedule
 import cn.bigdataflow.processor.transform.DoWrite
 
 /**
@@ -21,11 +16,11 @@ class PipedProcessorNode(val flowGraph: FlowGraph, val currentNode: ProcessorNod
 		new PipedProcessorNode(flowGraph, successorNode);
 	}
 
-	def >[T: Encoder](sink: BatchSink[T]): PipedProcessorNode = {
-		>(DoWrite[T](sink));
+	def >(sink: BatchSink): PipedProcessorNode = {
+		>(DoWrite(sink));
 	}
 
-	def >>[T: Encoder](sink: BatchSink[T]): PipedProcessorNode = {
-		>(DoWrite[T](sink));
+	def >>(sink: BatchSink): PipedProcessorNode = {
+		>(DoWrite(sink));
 	}
 }

@@ -13,7 +13,7 @@ class TriggerListenerImpl(teg: TriggerExtraGroup) extends TriggerListener with L
 	def getName() = this.getClass.getName;
 
 	def triggerFired(trigger: Trigger, context: JobExecutionContext) = {
-		teg.get(trigger.getKey).increaseFireCount();
+		teg.getOrCreate(trigger.getKey).increaseFireCount();
 		logger.debug(String.format("job fired: %s, scheduledJob: %s", context.getFireInstanceId, trigger.getKey.getName));
 	}
 
@@ -26,7 +26,7 @@ class TriggerListenerImpl(teg: TriggerExtraGroup) extends TriggerListener with L
 
 	def triggerComplete(trigger: Trigger, context: JobExecutionContext,
 		triggerInstructionCode: CompletedExecutionInstruction) {
-		teg.get(trigger.getKey).appendExecution(context);
+		teg.appendExecution(context);
 		logger.debug(String.format("job completed: %s, scheduledJob: %s", context.getFireInstanceId, trigger.getKey.getName));
 	}
 }

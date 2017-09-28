@@ -11,7 +11,7 @@ import org.apache.spark.sql.Dataset
  * @author bluejoe2008@gmail.com
  */
 
-case class SeqAsSource[X: Encoder](t: X*) extends BatchSource[X] {
+case class SeqAsSource[X: Encoder](t: X*) extends BatchSource {
 	override def toString = this.getClass.getSimpleName;
 	def createDataset(ctx: RunnerContext): Dataset[X] = {
 		ctx.forType[SparkSession].createDataset(t);

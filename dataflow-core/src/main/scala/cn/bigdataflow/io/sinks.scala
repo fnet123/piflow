@@ -8,20 +8,20 @@ import cn.bigdataflow.RunnerContext
 /**
  * @author bluejoe2008@gmail.com
  */
-case class ConsoleSink[T]() extends BatchSink[T] {
+case class ConsoleSink() extends BatchSink {
 	override def toString = this.getClass.getSimpleName;
-	def consumeDataset(ds: Dataset[T], ctx: RunnerContext) = {
+	def consumeDataset(ds: Dataset[_], ctx: RunnerContext) = {
 		ds.show();
 	}
 }
 
-case class MemorySink[T: ClassTag]() extends BatchSink[T] {
+case class MemorySink() extends BatchSink {
 	override def toString = this.getClass.getSimpleName;
-	val buffer = ArrayBuffer[T]();
+	val buffer = ArrayBuffer[Any]();
 
-	def consumeDataset(ds: Dataset[T], ctx: RunnerContext) = {
+	def consumeDataset(ds: Dataset[_], ctx: RunnerContext) = {
 		buffer ++= ds.collect();
 	}
 
-	def get(): Seq[T] = buffer.toSeq
+	def get(): Seq[_] = buffer.toSeq
 }

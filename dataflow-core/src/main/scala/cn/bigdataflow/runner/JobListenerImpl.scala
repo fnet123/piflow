@@ -1,9 +1,10 @@
 package cn.bigdataflow.runner
 
-import org.quartz.JobExecutionException
 import org.quartz.JobExecutionContext
-import cn.bigdataflow.Logging
+import org.quartz.JobExecutionException
 import org.quartz.JobListener
+
+import cn.bigdataflow.Logging
 
 /**
  * @author bluejoe2008@gmail.com

@@ -14,6 +14,6 @@ object PRELOAD_CODES {
 	import spark.implicits._;
 
 	implicit val runner = Runner.sparkRunner(spark);
-	//val jobs = new cn.bigdataflow.shell.cmd.JobCmd(runner);
-	//val store = new cn.bigdataflow.shell.cmd.StoreCmd(runner);
+	val jobs = new cn.bigdataflow.shell.cmd.JobCmd(runner);
+	val store = new cn.bigdataflow.shell.cmd.StoreCmd(runner);
 }

@@ -4,22 +4,22 @@ import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.streaming.StreamingQuery
 import cn.bigdataflow.RunnerContext
 
-trait Source[X];
+trait Source;
 
-trait BatchSource[X] extends Source[X] {
-	def createDataset(ctx: RunnerContext): Dataset[X];
+trait BatchSource extends Source {
+	def createDataset(ctx: RunnerContext): Dataset[_];
 }
 
-trait StreamSource[X] extends Source[X] {
+trait StreamSource extends Source {
 
 }
 
-trait Sink[X];
+trait Sink;
 
-trait BatchSink[X] extends Sink[X] {
-	def consumeDataset(ds: Dataset[X], ctx: RunnerContext);
+trait BatchSink extends Sink {
+	def consumeDataset(ds: Dataset[_], ctx: RunnerContext);
 }
 
-trait StreamSink[X] extends Sink[X] {
-	def consumeDataset(ds: Dataset[X], ctx: RunnerContext): StreamingQuery;
+trait StreamSink extends Sink {
+	def consumeDataset(ds: Dataset[_], ctx: RunnerContext): StreamingQuery;
 }

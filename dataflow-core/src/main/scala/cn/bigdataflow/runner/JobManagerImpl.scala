@@ -26,7 +26,13 @@ class JobManagerImpl(scheduler: Scheduler, teg: TriggerExtraGroup) extends JobMa
 	}
 
 	def getHistoricExecutions(jobId: String) = {
-		teg.get(jobId).getHistoricExecutions().map {
+		teg.getHistoricExecutions().filter(_.getTrigger.getKey.getName.equals(jobId)).map {
+			new JobInstanceImpl(_);
+		}
+	}
+
+	def getHistoricExecutions() = {
+		teg.getHistoricExecutions().map {
 			new JobInstanceImpl(_);
 		}
 	}

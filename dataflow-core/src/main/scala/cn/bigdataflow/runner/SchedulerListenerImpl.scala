@@ -13,7 +13,7 @@ import org.quartz.Trigger
  */
 class SchedulerListenerImpl(teg: TriggerExtraGroup) extends SchedulerListener with Logging {
 	def jobScheduled(trigger: Trigger) {
-		teg.login(trigger.getKey);
+		teg.getOrCreate(trigger.getKey);
 		logger.debug(String.format("job scheduled: %s", trigger.getKey.getName));
 	}
 

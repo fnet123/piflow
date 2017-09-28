@@ -38,6 +38,7 @@ object Runner {
 trait JobManager {
 	def exists(jobId: String): Boolean;
 	def getFireCount(jobId: String): Int;
+	def getHistoricExecutions(): Seq[JobInstance];
 	def getHistoricExecutions(jobId: String): Seq[JobInstance];
 	def getScheduledJobs(): Seq[ScheduledJob];
 	def getRunningJobs(): Seq[JobInstance];

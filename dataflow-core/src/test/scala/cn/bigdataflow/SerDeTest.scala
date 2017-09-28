@@ -28,7 +28,7 @@ class SerDeTest {
 		val fg = new FlowGraph();
 		val node1 = fg.createNode(DoLoad(SeqAsSource(1, 2, 3, 4)));
 		val node2 = fg.createNode(DoMap[Int, Int](_ + 1));
-		val mem = MemorySink[String]();
+		val mem = MemorySink();
 		val node3 = fg.createNode(DoWrite(mem));
 		fg.link(node1, node2, ("out:_1", "in:_1"));
 		fg.link(node2, node3, ("out:_1", "in:_1"));

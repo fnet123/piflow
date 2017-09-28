@@ -8,8 +8,8 @@ import cn.bigdataflow.processor.Processor121
  *
  * do nothing, just sleep, this class is for test use
  */
-case class DoSleep[X](sleepTime: Long) extends Processor121[X, X] {
-	def perform(input: X, ctx: RunnerContext): X = {
+case class DoSleep(sleepTime: Long) extends Processor121 {
+	def perform(input: Any, ctx: RunnerContext): Any = {
 		Thread.sleep(sleepTime);
 		input;
 	}

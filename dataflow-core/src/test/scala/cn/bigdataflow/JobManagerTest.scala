@@ -24,7 +24,7 @@ class JobManagerTest {
 		val fg = new FlowGraph();
 		val node1 = fg.createNode(DoLoad(SeqAsSource(1, 2, 3, 4)));
 		val node2 = fg.createNode(DoMap[Int, Int](_ + 1));
-		val node3 = fg.createNode(DoWrite(ConsoleSink[String]()));
+		val node3 = fg.createNode(DoWrite(ConsoleSink()));
 		val node4 = fg.createNode(new Processor020() {
 			override def perform(ctx: RunnerContext) = {
 				Thread.sleep(3000);

@@ -73,17 +73,12 @@ class JobCmd(runner: Runner) extends Cmd {
 
 	def listJobExecutions(jobId: String) = {
 		val jm = runner.getJobManager();
-		existingJobId(jm, jobId).foreach { jobId ⇒
-			printInstances(jm.getHistoricExecutions(jobId));
-		}
+		printInstances(jm.getHistoricExecutions(jobId));
 	}
 
 	def listJobExecutions() = {
 		val jm = runner.getJobManager();
-		val jobs = jm.getScheduledJobs().flatMap { sj ⇒
-			jm.getHistoricExecutions(sj.getId);
-		}
-		printInstances(jobs);
+		printInstances(jm.getHistoricExecutions());
 	}
 
 	def listScheduledJobs() = {

@@ -4,7 +4,7 @@ import cn.bigdataflow.FlowGraph
 import cn.bigdataflow.ProcessorNode
 import cn.bigdataflow.io.BatchSink
 import cn.bigdataflow.processor.Processor
-import cn.bigdataflow.processor.transform.DoWrite
+import cn.bigdataflow.processor.io.DoWrite
 
 /**
  * @author bluejoe2008@gmail.com

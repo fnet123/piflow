@@ -1,7 +1,6 @@
-package cn.bigdataflow.processor.transform
+package cn.bigdataflow.processor
 
 import cn.bigdataflow.RunnerContext
-import cn.bigdataflow.processor.Processor121
 
 /**
  * @author bluejoe2008@gmail.com

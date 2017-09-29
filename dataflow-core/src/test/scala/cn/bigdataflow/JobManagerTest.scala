@@ -9,9 +9,9 @@ import org.junit.Test
 import cn.bigdataflow.io.ConsoleSink
 import cn.bigdataflow.io.SeqAsSource
 import cn.bigdataflow.processor.Processor020
-import cn.bigdataflow.processor.transform.DoLoad
-import cn.bigdataflow.processor.transform.DoMap
-import cn.bigdataflow.processor.transform.DoWrite
+import cn.bigdataflow.processor.io.DoLoad
+import cn.bigdataflow.processor.ds.DoMap
+import cn.bigdataflow.processor.io.DoWrite
 
 class JobManagerTest {
 	val spark = SparkSession.builder.master("local[4]")

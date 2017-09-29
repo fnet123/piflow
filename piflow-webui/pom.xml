@@ -8,9 +8,7 @@
 		<artifactId>piflow-project</artifactId>
 		<version>0.9</version>
 	</parent>
-	<groupId>piflow</groupId>
 	<artifactId>piflow-webui</artifactId>
-	<version>0.9</version>
 	<name>piflow-webui</name>
 	<url>http://maven.apache.org</url>
 	<properties>

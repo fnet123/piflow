@@ -23,8 +23,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>bigdataflow</groupId>
-			<artifactId>dataflow-core</artifactId>
+			<groupId>piflow</groupId>
+			<artifactId>piflow-core</artifactId>
 			<version>0.9</version>
 		</dependency>
 	</dependencies>

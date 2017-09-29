@@ -1,11 +1,11 @@
-import cn.bigdataflow.processor.ds._
-import cn.bigdataflow.processor.io._
-import cn.bigdataflow.io._
-import cn.bigdataflow.dsl._
+import cn.piflow.processor.ds._
+import cn.piflow.processor.io._
+import cn.piflow.io._
+import cn.piflow.dsl._
 import java.util._
 import org.apache.spark.sql._
-import cn.bigdataflow._
-import cn.bigdataflow.shell._
+import cn.piflow._
+import cn.piflow.shell._
 
 object PRELOAD_CODES {
 	implicit val spark = SparkSession.builder.master("local[4]")
@@ -15,6 +15,6 @@ object PRELOAD_CODES {
 	import spark.implicits._;
 
 	implicit val runner = Runner.sparkRunner(spark);
-	val jobs = new cn.bigdataflow.shell.cmd.JobCmd(runner);
-	val store = new cn.bigdataflow.shell.cmd.StoreCmd(runner);
+	val jobs = new cn.piflow.shell.cmd.JobCmd(runner);
+	val store = new cn.piflow.shell.cmd.StoreCmd(runner);
 }

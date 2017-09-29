@@ -1,10 +1,7 @@
 package cn.piflow.runner
 
-import org.quartz.JobExecutionContext
-import org.quartz.JobExecutionException
-import org.quartz.JobListener
-
 import cn.piflow.Logging
+import org.quartz.{JobExecutionContext, JobExecutionException, JobListener}
 
 /**
  * @author bluejoe2008@gmail.com

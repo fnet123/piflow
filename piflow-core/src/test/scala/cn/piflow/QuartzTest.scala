@@ -3,12 +3,8 @@ package cn.piflow;
 import java.util.Date
 
 import org.junit.Test
-import org.quartz.JobExecutionContext
-import org.quartz.SimpleScheduleBuilder
-import org.quartz.TriggerBuilder
+import org.quartz.{CronScheduleBuilder, JobBuilder, JobExecutionContext, TriggerBuilder}
 import org.quartz.impl.StdSchedulerFactory
-import org.quartz.JobBuilder
-import org.quartz.CronScheduleBuilder
 
 class HelloQuartz extends org.quartz.Job {
 	println("=====new instance=====");

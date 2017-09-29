@@ -1,19 +1,15 @@
 package cn.piflow.processor.io
 
-import scala.reflect.ClassTag
-import org.apache.commons.lang3.ArrayUtils
-import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.Encoder
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.streaming.OutputMode
-import cn.piflow.RunnerContext
-import cn.piflow.io.BatchSink
-import cn.piflow.io.BatchSource
-import scala.reflect.ManifestFactory.classType
-import cn.piflow.processor.Processor021
-import cn.piflow.processor.ProcessorN21
-import cn.piflow.processor.Processor120
 import java.util.concurrent.atomic.AtomicInteger
+
+import cn.piflow.RunnerContext
+import cn.piflow.io.{BatchSink, BatchSource}
+import cn.piflow.processor.{Processor021, Processor120, ProcessorN21}
+import org.apache.commons.lang3.ArrayUtils
+import org.apache.spark.sql.{Dataset, Encoder, SparkSession}
+import org.apache.spark.sql.streaming.OutputMode
+
+import scala.reflect.ClassTag
 
 /**
  * @author bluejoe2008@gmail.com

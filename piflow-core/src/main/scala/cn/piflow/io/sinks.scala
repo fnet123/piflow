@@ -1,9 +1,9 @@
 package cn.piflow.io
 
-import org.apache.spark.sql.Dataset
-import scala.collection.mutable.ArrayBuffer
-import scala.reflect.ClassTag
 import cn.piflow.RunnerContext
+import org.apache.spark.sql.Dataset
+
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * @author bluejoe2008@gmail.com

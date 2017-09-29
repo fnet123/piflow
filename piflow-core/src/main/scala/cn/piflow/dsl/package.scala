@@ -1,7 +1,5 @@
 package cn.piflow
 
-import org.apache.spark.sql.Encoder
-import cn.piflow.dsl.PipedProcessorNode
 import cn.piflow.io.BatchSource
 import cn.piflow.processor.Processor
 import cn.piflow.processor.io.DoLoad

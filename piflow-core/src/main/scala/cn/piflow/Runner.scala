@@ -1,10 +1,12 @@
 package cn.piflow
 
 import java.util.Date
-import scala.reflect.ClassTag
+
+import cn.piflow.runner.SparkRunner
 import org.apache.log4j.Logger
 import org.apache.spark.sql.SparkSession
-import cn.piflow.runner.SparkRunner
+
+import scala.reflect.ClassTag
 
 trait Logging {
 	protected val logger = Logger.getLogger(this.getClass);

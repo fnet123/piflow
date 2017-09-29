@@ -2,6 +2,7 @@ package cn.piflow.util
 
 import java.text.SimpleDateFormat
 import java.util.Date
+
 import org.apache.commons.lang.StringUtils
 
 object FormatUtils {

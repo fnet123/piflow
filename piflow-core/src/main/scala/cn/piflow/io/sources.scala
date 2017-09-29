@@ -1,11 +1,7 @@
 package cn.piflow.io
 
-import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.Encoder
-import org.apache.spark.sql.SparkSession
 import cn.piflow.RunnerContext
-import scala.reflect.ManifestFactory.classType
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.{Dataset, Encoder, SparkSession}
 
 /**
  * @author bluejoe2008@gmail.com

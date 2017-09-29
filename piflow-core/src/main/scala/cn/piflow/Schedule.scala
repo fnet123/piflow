@@ -2,9 +2,7 @@ package cn.piflow
 
 import java.util.Date
 
-import org.quartz.ScheduleBuilder
-import org.quartz.SimpleScheduleBuilder
-import org.quartz.CronScheduleBuilder
+import org.quartz.{CronScheduleBuilder, ScheduleBuilder, SimpleScheduleBuilder}
 
 object Schedule {
 	def startNow() = new Schedule().startNow();

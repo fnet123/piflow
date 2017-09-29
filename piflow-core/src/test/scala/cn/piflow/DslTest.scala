@@ -1,23 +1,13 @@
 package cn.piflow;
 
-import java.io.File
-import java.io.FileWriter
+import java.io.{File, FileWriter}
 
+import cn.piflow.dsl.{Ref, _}
+import cn.piflow.io.{ConsoleSink, MemorySink, SeqAsSource}
+import cn.piflow.processor.ds.{DoFilter, DoFork, DoMap, DoMerge}
+import cn.piflow.processor.io.{DoLoad, DoWrite, DoZip}
 import org.apache.spark.sql.SparkSession
-import org.junit.Assert
-import org.junit.Test
-import cn.piflow.dsl._
-import cn.piflow.dsl.Ref
-import cn.piflow.io.ConsoleSink
-import cn.piflow.io.MemorySink
-import cn.piflow.io.SeqAsSource
-import cn.piflow.processor.ds.DoFilter
-import cn.piflow.processor.ds.DoFork
-import cn.piflow.processor.ds.DoMap
-import cn.piflow.processor.ds.DoMerge
-import cn.piflow.processor.io.DoLoad
-import cn.piflow.processor.io.DoWrite
-import cn.piflow.processor.io.DoZip
+import org.junit.{Assert, Test}
 
 class DslTest {
 	val spark = SparkSession.builder.master("local[4]")

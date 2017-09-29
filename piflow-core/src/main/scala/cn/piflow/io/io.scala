@@ -1,8 +1,8 @@
 package cn.piflow.io
 
+import cn.piflow.RunnerContext
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.streaming.StreamingQuery
-import cn.piflow.RunnerContext
 
 trait Source;
 

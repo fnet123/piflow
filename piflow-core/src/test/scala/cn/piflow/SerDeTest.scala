@@ -1,16 +1,15 @@
 package cn.piflow;
 
-import org.junit.Test;
-import cn.piflow.util.SerDeUtils
-import cn.piflow.processor.io.DoLoad
-import cn.piflow.processor.io.DoWrite
+import java.nio.ByteBuffer
+
+import cn.piflow.io.{MemorySink, SeqAsSource}
 import cn.piflow.processor.ds.DoMap
-import cn.piflow.io.SeqAsSource
-import org.apache.spark.sql.SparkSession
-import cn.piflow.io.MemorySink
+import cn.piflow.processor.io.{DoLoad, DoWrite}
+import cn.piflow.util.SerDeUtils
 import org.apache.spark.SparkConf
 import org.apache.spark.serializer.KryoSerializer
-import java.nio.ByteBuffer
+import org.apache.spark.sql.SparkSession
+import org.junit.Test
 
 class SerDeTest {
 	val spark = SparkSession.builder.master("local[4]")

@@ -2,15 +2,12 @@ package cn.piflow;
 
 import java.util.Date
 
-import org.apache.spark.sql.SparkSession
-import org.junit.Assert
-import org.junit.Test
+import cn.piflow.io.{ConsoleSink, SeqAsSource}
 import cn.piflow.processor.Processor020
-import cn.piflow.processor.io.DoLoad
-import cn.piflow.processor.io.DoWrite
 import cn.piflow.processor.ds.DoMap
-import cn.piflow.io.SeqAsSource
-import cn.piflow.io.ConsoleSink
+import cn.piflow.processor.io.{DoLoad, DoWrite}
+import org.apache.spark.sql.SparkSession
+import org.junit.{Assert, Test}
 
 class JobManagerTest {
 	val spark = SparkSession.builder.master("local[4]")

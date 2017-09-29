@@ -3,17 +3,11 @@ package cn.piflow.util
 import java.nio.ByteBuffer
 import java.util.Base64
 
-import scala.reflect.ClassTag
-
+import cn.piflow.FlowGraph
 import org.apache.spark.SparkConf
 import org.apache.spark.serializer.KryoSerializer
 
-import com.esotericsoftware.kryo.Kryo
-import com.esotericsoftware.kryo.Serializer
-import com.google.common.graph.DirectedGraphConnections
-import com.esotericsoftware.kryo.io.Output
-import com.google.common.graph.DirectedGraphConnections
-import cn.piflow.FlowGraph
+import scala.reflect.ClassTag
 
 object SerDeUtils {
 	val kryo = new KryoSerializer(new SparkConf()).newInstance();

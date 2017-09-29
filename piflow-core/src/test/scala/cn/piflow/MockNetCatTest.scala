@@ -1,8 +1,8 @@
 package cn.piflow
 
+import cn.piflow.util.MockNetCat
 import org.apache.spark.sql.SparkSession
 import org.junit.Test
-import cn.piflow.util.MockNetCat
 
 class MockNetCatTest {
 	var nc: MockNetCat = MockNetCat.start(9999);

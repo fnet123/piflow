@@ -1,7 +1,6 @@
 package cn.piflow.dsl
 
-import cn.piflow.FlowGraph
-import cn.piflow.ProcessorNode
+import cn.piflow.{FlowGraph, ProcessorNode}
 import cn.piflow.io.BatchSink
 import cn.piflow.processor.Processor
 import cn.piflow.processor.io.DoWrite

@@ -1,8 +1,9 @@
 package cn.piflow.runner
 
-import org.quartz.JobExecutionContext
-import org.quartz.TriggerKey
 import java.util.concurrent.atomic.AtomicInteger
+
+import org.quartz.{JobExecutionContext, TriggerKey}
+
 import scala.collection.mutable.ArrayBuffer
 
 trait TriggerExtra {

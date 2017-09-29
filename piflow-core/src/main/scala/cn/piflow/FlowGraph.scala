@@ -1,13 +1,10 @@
 package cn.piflow
 
-import scala.collection.JavaConversions.asScalaSet
-
-import com.google.common.graph.EndpointPair
-import com.google.common.graph.MutableValueGraph
-import com.google.common.graph.ValueGraphBuilder
-
 import cn.piflow.processor.Processor
 import cn.piflow.util.FormatUtils
+import com.google.common.graph.{EndpointPair, MutableValueGraph, ValueGraphBuilder}
+
+import scala.collection.JavaConversions.asScalaSet
 
 class ProcessorNode(val id: Int, val processor: Processor) {
 }

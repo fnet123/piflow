@@ -1,6 +1,5 @@
 package cn.piflow.processor
 
-import org.apache.spark.sql.Dataset
 import cn.piflow.RunnerContext
 
 /**

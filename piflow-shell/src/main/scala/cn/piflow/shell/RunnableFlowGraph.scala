@@ -2,10 +2,7 @@ package cn.piflow.shell
 
 import java.util.Date
 
-import cn.piflow.FlowGraph
-import cn.piflow.Runner
-import cn.piflow.Schedule
-import cn.piflow.ScheduledJob
+import cn.piflow.{FlowGraph, Runner, Schedule, ScheduledJob}
 import cn.piflow.dsl.PipedProcessorNode
 import cn.piflow.util.FormatUtils
 

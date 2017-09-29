@@ -1,10 +1,8 @@
 package cn.piflow.runner
 
-import org.quartz.JobExecutionContext
-import org.quartz.Trigger.CompletedExecutionInstruction
-import org.quartz.TriggerListener
 import cn.piflow.Logging
-import org.quartz.Trigger
+import org.quartz.Trigger.CompletedExecutionInstruction
+import org.quartz.{JobExecutionContext, Trigger, TriggerListener}
 
 /**
  * @author bluejoe2008@gmail.com

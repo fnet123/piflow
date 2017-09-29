@@ -2,24 +2,11 @@ package cn.piflow.runner
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import scala.collection.JavaConversions.mapAsScalaMap
-
-import org.apache.spark.sql.SparkSession
-import org.quartz.Job
-import org.quartz.JobBuilder
-import org.quartz.JobExecutionContext
-import org.quartz.TriggerBuilder
+import cn.piflow.{FlowGraph, JobManager, Logging, Runner, Schedule, ScheduledJob}
+import org.quartz.{Job, JobBuilder, JobExecutionContext, TriggerBuilder}
 import org.quartz.impl.StdSchedulerFactory
 
-import cn.piflow.FlowGraph
-import cn.piflow.JobManager
-import cn.piflow.Logging
-import cn.piflow.Runner
-import cn.piflow.Schedule
-import cn.piflow.ScheduledJob
-import java.util.concurrent.locks.ReentrantLock
-import java.util.concurrent.locks.Lock
-import org.quartz.TriggerKey
+import scala.collection.JavaConversions.mapAsScalaMap
 
 /**
  * @author bluejoe2008@gmail.com

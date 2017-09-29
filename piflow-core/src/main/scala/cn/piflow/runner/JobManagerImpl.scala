@@ -2,19 +2,11 @@ package cn.piflow.runner
 
 import java.util.Date
 
-import scala.collection.JavaConversions.iterableAsScalaIterable
-
-import org.quartz.JobDetail
-import org.quartz.JobExecutionContext
-import org.quartz.Scheduler
-import org.quartz.Trigger
-import org.quartz.TriggerKey
+import cn.piflow.{FlowGraph, JobInstance, JobManager, ScheduledJob}
+import org.quartz.{JobDetail, JobExecutionContext, Scheduler, Trigger, TriggerKey}
 import org.quartz.impl.matchers.GroupMatcher
 
-import cn.piflow.FlowGraph
-import cn.piflow.JobInstance
-import cn.piflow.JobManager
-import cn.piflow.ScheduledJob
+import scala.collection.JavaConversions.iterableAsScalaIterable
 
 class JobManagerImpl(scheduler: Scheduler, teg: TriggerExtraGroup) extends JobManager {
 	def getFireCount(jobId: String): Int = {

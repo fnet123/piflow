@@ -1,12 +1,11 @@
 package cn.piflow.shell
 
+import cn.piflow.Runner
+import org.apache.commons.io.IOUtils
+
 import scala.tools.nsc.Settings
 import scala.tools.nsc.interpreter.ILoop
 import scala.xml.XML
-
-import org.apache.commons.io.IOUtils
-import javax.script.ScriptContext
-import cn.piflow.Runner
 
 class Shell {
 	lazy val properties = {

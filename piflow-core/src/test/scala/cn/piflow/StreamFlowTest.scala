@@ -1,27 +1,12 @@
 package cn.piflow;
 
-import java.io.File
-import java.io.PrintWriter
-import java.net.Socket
-import org.apache.commons.io.FileUtils
-import org.apache.spark.sql.Row
-import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.streaming.OutputMode
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import cn.piflow.processor.ds.DoFlatMap
-import cn.piflow.processor.io.DoLoadStream
-import cn.piflow.processor.ds.DoMap
-import cn.piflow.processor.ds.DoTransform
-import cn.piflow.processor.io.DoWriteStream
-import org.apache.spark.sql.execution.streaming.StreamExecution
-import org.apache.spark.sql.execution.streaming.MemorySink
-import cn.piflow.processor.ds.AsDataSet
-import org.apache.spark.sql.Dataset
+import cn.piflow.processor.ds.{AsDataSet, DoFlatMap, DoMap, DoTransform}
+import cn.piflow.processor.io.{DoLoadStream, DoWriteStream}
 import cn.piflow.util.MockNetCat
-import org.junit.Assert
+import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
+import org.apache.spark.sql.execution.streaming.{MemorySink, StreamExecution}
+import org.apache.spark.sql.streaming.OutputMode
+import org.junit.{Assert, Test}
 
 class StreamFlowTest {
 	val cronExpr = "*/5 * * * * ";

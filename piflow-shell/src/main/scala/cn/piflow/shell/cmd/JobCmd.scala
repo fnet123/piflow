@@ -1,11 +1,9 @@
 package cn.piflow.shell.cmd
 
-import cn.piflow.JobInstance
-import cn.piflow.JobManager
-import cn.piflow.Runner
-import cn.piflow.ScheduledJob
-import cn.piflow.util.FormatUtils
+import cn.piflow.{JobInstance, JobManager, Runner, ScheduledJob}
 import cn.piflow.shell.Cmd
+import cn.piflow.util.FormatUtils
+
 import scala.collection.Seq
 
 class JobCmd(runner: Runner) extends Cmd {

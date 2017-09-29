@@ -1,12 +1,7 @@
 package cn.piflow.runner
 
-import org.quartz.JobDetail
-import org.quartz.SchedulerException
-import org.quartz.TriggerKey
-import org.quartz.JobKey
-import org.quartz.SchedulerListener
 import cn.piflow.Logging
-import org.quartz.Trigger
+import org.quartz.{JobDetail, JobKey, SchedulerException, SchedulerListener, Trigger, TriggerKey}
 
 /**
  * @author bluejoe2008@gmail.com

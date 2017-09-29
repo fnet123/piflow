@@ -1,13 +1,10 @@
 package cn.piflow.runner
 
-import scala.collection.JavaConversions.asScalaSet
+import cn.piflow.{FlowGraph, Logging, RunnerContext}
+import cn.piflow.processor.ProcessorN2N
 import org.apache.spark.sql.SparkSession
 
-import cn.piflow.FlowGraph
-import cn.piflow.Logging
-import cn.piflow.RunnerContext
-import cn.piflow.processor.ProcessorN2N;
-import java.util.concurrent.atomic.AtomicInteger
+import scala.collection.JavaConversions.asScalaSet
 
 class MapAsRunnerContext(map: scala.collection.mutable.Map[String, Any]) extends RunnerContext {
 	def apply[T](name: String): T = map(name).asInstanceOf[T];

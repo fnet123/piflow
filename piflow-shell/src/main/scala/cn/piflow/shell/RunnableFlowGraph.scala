@@ -14,7 +14,7 @@ class RunnableFlowGraph(flowGraph: FlowGraph)(implicit runner: Runner) {
 	def this(node: PipedProcessorNode)(implicit runner: Runner) = this(node.flowGraph)(runner);
 
 	def !() {
-		val time1 = System.currentTimeMillis();
+		val time1 = +System.currentTimeMillis();
 		val job = runner.run(flowGraph);
 		val time2 = System.currentTimeMillis();
 		val jobId = job.getId();

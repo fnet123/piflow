@@ -26,8 +26,8 @@ class Shell {
 				val text = IOUtils.toString(this.getClass.getResource("/predefined.scala").openStream());
 				intp.quietRun(text.replaceAll("object\\s+PRELOAD_CODES\\s+\\{([\\s\\S]*)\\}", "$1"));
 				intp.beQuietDuring {
-					//intp.bind("jobs", new cn.bigdataflow.shell.cmd.JobCmd(runner));
-					//intp.bind("store", new cn.bigdataflow.shell.cmd.StoreCmd(runner));
+					//intp.bind("jobs", new cn.piflow.shell.cmd.JobCmd(runner));
+					//intp.bind("store", new cn.piflow.shell.cmd.StoreCmd(runner));
 				}
 			}
 

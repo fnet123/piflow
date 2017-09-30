@@ -4,7 +4,7 @@ import org.junit.Test;
 
 class ShellTest {
 	@Test
-	def testFlowSequence() = {
+	def testRun() = {
 		ShellRunner.main(Array[String]());
 	}
 }

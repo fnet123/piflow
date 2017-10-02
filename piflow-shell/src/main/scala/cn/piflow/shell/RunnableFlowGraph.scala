@@ -2,55 +2,55 @@ package cn.piflow.shell
 
 import java.util.Date
 
-import cn.piflow.{FlowGraph, Runner, Schedule, ScheduledJob}
+import cn.piflow._
 import cn.piflow.dsl.PipedProcessorNode
 import cn.piflow.util.FormatUtils
 
 /**
- * @author bluejoe2008@gmail.com
- */
+  * @author bluejoe2008@gmail.com
+  */
 
 class RunnableFlowGraph(flowGraph: FlowGraph)(implicit runner: Runner) {
-	def this(node: PipedProcessorNode)(implicit runner: Runner) = this(node.flowGraph)(runner);
+  def this(node: PipedProcessorNode)(implicit runner: Runner) = this(node.flowGraph)(runner);
 
-	def !() {
-		val time1 = +System.currentTimeMillis();
-		val job = runner.run(flowGraph);
-		val time2 = System.currentTimeMillis();
-		val jobId = job.getId();
-		val cost = time2 - time1;
-		println(s"job complete: id=$jobId, time cost=${cost}ms");
-	}
+  def !() {
+    val time1 = +System.currentTimeMillis();
+    val job = runner.run(flowGraph);
+    val time2 = System.currentTimeMillis();
+    val jobId = job.getId();
+    val cost = time2 - time1;
+    println(s"job complete: id=$jobId, time cost=${cost}ms");
+  }
 
-	def &() {
-		val job = runner.schedule(flowGraph);
-		val jobId = job.getId();
-		println(s"job scheduled: id=$jobId");
-	}
+  def &() {
+    val job = runner.schedule(flowGraph);
+    val jobId = job.getId();
+    println(s"job scheduled: id=$jobId");
+  }
 
-	def !@(date: Date) = {
-		val job = runner.schedule(flowGraph, Schedule.startAt(date));
-		printScheduledJobInfo(job);
-	}
+  def !@(date: Date) = {
+    val job = runner.schedule(flowGraph, Start.at(date));
+    printScheduledJobInfo(job);
+  }
 
-	def !@(schedule: Schedule) = {
-		val job = runner.schedule(flowGraph, schedule);
-		printScheduledJobInfo(job);
-	}
+  def !@(schedule: JobSchedule) = {
+    val job = runner.schedule(flowGraph, schedule);
+    printScheduledJobInfo(job);
+  }
 
-	def !@(cronExpression: String) = {
-		val job = runner.schedule(flowGraph, Schedule.startNow().repeatCronly(cronExpression));
-		printScheduledJobInfo(job);
-	}
+  def !@(cronExpression: String) = {
+    val job = runner.schedule(flowGraph, Start.now, Repeat.cronedly(cronExpression));
+    printScheduledJobInfo(job);
+  }
 
-	private def printScheduledJobInfo(job: ScheduledJob) = {
-		val jobId = job.getId();
-		val nftime = FormatUtils.formatDate(job.getNextFireTime());
-		println(s"job scheduled: id=$jobId, next fired time=$nftime");
-	}
+  private def printScheduledJobInfo(job: ScheduledJob) = {
+    val jobId = job.getId();
+    val nftime = FormatUtils.formatDate(job.getNextFireTime());
+    println(s"job scheduled: id=$jobId, next fired time=$nftime");
+  }
 
-	def !@(delay: Long) = {
-		val job = runner.schedule(flowGraph, Schedule.startLater(delay));
-		printScheduledJobInfo(job);
-	}
+  def !@(delay: Long) = {
+    val job = runner.schedule(flowGraph, Start.later(delay));
+    printScheduledJobInfo(job);
+  }
 }

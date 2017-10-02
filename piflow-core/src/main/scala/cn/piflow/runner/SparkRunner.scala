@@ -26,11 +26,6 @@ object SparkRunner extends Runner with Logging {
 
   def getJobManager(): JobManager = jobManager;
 
-  private def validate(flowGraph: FlowGraph) {
-    //ports
-    //no-loop
-  }
-
   def stop = {
     if (!jobManager.getScheduledJobs().isEmpty)
       logger.warn("Runner is to be shutdown, while there are running jobs!");
@@ -52,6 +47,13 @@ object SparkRunner extends Runner with Logging {
       quartzScheduler.unscheduleJob(key);
 
     sj;
+  }
+
+  def schedule(flowGraph: FlowGraph, start: Start.Builder = Start.now, run: Repeat.Builder = Repeat.once): ScheduledJob = {
+    val js = new JobSchedule();
+    start(js);
+    run(js);
+    schedule(flowGraph, js);
   }
 
   def schedule(flowGraph: FlowGraph, schedule: JobSchedule): ScheduledJob = {
@@ -82,11 +84,9 @@ object SparkRunner extends Runner with Logging {
     new ScheduledJobImpl(jobDetail, trigger);
   }
 
-  def schedule(flowGraph: FlowGraph, start: Start.Builder = Start.now, run: Repeat.Builder = Repeat.once): ScheduledJob = {
-    val js = new JobSchedule();
-    start(js);
-    run(js);
-    schedule(flowGraph, js);
+  private def validate(flowGraph: FlowGraph) {
+    //ports
+    //no-loop
   }
 }
 

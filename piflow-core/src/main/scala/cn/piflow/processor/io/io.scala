@@ -3,80 +3,93 @@ package cn.piflow.processor.io
 import java.util.concurrent.atomic.AtomicInteger
 
 import cn.piflow.RunnerContext
-import cn.piflow.io.{BatchSink, BatchSource}
-import cn.piflow.processor.{Processor021, Processor120, ProcessorN21}
-import org.apache.commons.lang3.ArrayUtils
-import org.apache.spark.sql.{Dataset, Encoder, SparkSession}
-import org.apache.spark.sql.streaming.OutputMode
-
-import scala.reflect.ClassTag
+import cn.piflow.io.{BatchSink, BatchSource, Sink, StreamSink}
+import cn.piflow.processor.{Processor021, Processor120}
+import cn.piflow.util.ReflectUtils._
+import org.apache.spark.sql._
+import org.apache.spark.sql.execution.streaming.{Sink => SparkStreamSink}
+import org.apache.spark.sql.streaming.{OutputMode, ProcessingTime, StreamingQuery}
 
 /**
- * @author bluejoe2008@gmail.com
- */
+  * @author bluejoe2008@gmail.com
+  */
 object DoLoad {
-	def apply(format: String, args: Map[String, String] = Map()) = {
-		new DoLoadDefinedSource(format, args);
-	}
+  def apply(format: String, args: Map[String, String] = Map()) = {
+    new _DoLoadDefinedSource(format, args);
+  }
 
-	def apply(source: BatchSource) = {
-		new DoLoadSource(source);
-	}
+  def apply(source: BatchSource) = {
+    new _DoLoadSource(source);
+  }
 }
 
-case class DoLoadSource(source: BatchSource) extends Processor021 {
-	override def perform(ctx: RunnerContext): Dataset[_] = {
-		source.createDataset(ctx);
-	}
+case class _DoLoadSource(source: BatchSource) extends Processor021 {
+  override def perform(ctx: RunnerContext): Dataset[_] = {
+    source.createDataset(ctx);
+  }
 }
 
-case class DoLoadDefinedSource(format: String, args: Map[String, String]) extends Processor021 {
-	override def perform(ctx: RunnerContext): Dataset[_] = {
-		ctx.forType[SparkSession].read.format(format).options(args).load();
-	}
+case class _DoLoadDefinedSource(format: String, args: Map[String, String]) extends Processor021 {
+  override def perform(ctx: RunnerContext): Dataset[_] = {
+    ctx.forType[SparkSession].read.format(format).options(args).load();
+  }
 }
 
 case class DoLoadStream(format: String, args: Map[String, String]) extends Processor021 {
+  override def perform(ctx: RunnerContext): Dataset[_] = {
+    val df = ctx.forType[SparkSession].readStream.format(format).options(args).load();
+    df;
+  }
+}
+
+/*
+case class DoLoadStream2(source: StreamSource) extends Processor021 {
 	override def perform(ctx: RunnerContext): Dataset[_] = {
+		Dataset.ofRows(sparkSession, StreamingRelation(dataSource));
 		val df = ctx.forType[SparkSession].readStream.format(format).options(args).load();
 		df;
 	}
 }
+*/
 
-case class DoWrite(sinks: BatchSink*) extends Processor120 {
-	override def toString = {
-		val as = ArrayUtils.toString(sinks.map(_.toString()).toArray);
-		String.format("%s(%s)", this.getClass.getSimpleName, as.substring(1, as.length() - 1));
-	}
+case class DoWrite(sink: Sink, outputMode: OutputMode = OutputMode.Complete) extends Processor120 {
+  override def perform(input: Any, ctx: RunnerContext) {
+    val ds: Dataset[_] = input.asInstanceOf[Dataset[_]];
+    if (ds.isStreaming)
+      performStream(sink.asInstanceOf[StreamSink], ds, ctx);
+    else
+      performBatch(sink.asInstanceOf[BatchSink], ds, ctx);
+  }
 
-	override def perform(input: Any, ctx: RunnerContext) {
-		val writeHandlers = sinks.map { x ⇒
-			x.consumeDataset(input.asInstanceOf[Dataset[_]], ctx);
-		};
-	}
+  def performStream(ss: StreamSink, ds: Dataset[_], ctx: RunnerContext) {
+    val df = ds.toDF();
+    val query = df.sparkSession.doGet("sessionState").doGet("streamingQueryManager").doCall("startQuery")(
+      DoWrite.getNextQueryId,
+      ctx("checkpointLocation").asInstanceOf[String],
+      df,
+      asSparkStreamSink(ss, ctx),
+      outputMode,
+      ss.useTempCheckpointLocation(outputMode, ctx),
+      ss.recoverFromCheckpointLocation(outputMode, ctx),
+      ProcessingTime(0) //start now
+    ).asInstanceOf[StreamingQuery];
+
+    query.awaitTermination();
+  }
+
+  def asSparkStreamSink(ss: StreamSink, ctx: RunnerContext) = new SparkStreamSink() {
+    def addBatch(batchId: Long, data: DataFrame): Unit = {
+      ss.addBatch(batchId, data, outputMode, ctx);
+    }
+  }
+
+  def performBatch(bs: BatchSink, ds: Dataset[_], ctx: RunnerContext): Unit = {
+    bs.saveDataset(ds, outputMode, ctx);
+  }
 }
 
-object DoWriteStream {
-	val queryId = new AtomicInteger(0);
-	def getNextQueryId() = "query-" + queryId.incrementAndGet();
+object DoWrite {
+  val queryId = new AtomicInteger(0);
+
+  def getNextQueryId() = "query-" + queryId.incrementAndGet();
 }
-
-case class DoWriteStream(format: String, outputMode: OutputMode, args: Map[String, String] = Map())
-		extends Processor120 {
-	override def perform(input: Any, ctx: RunnerContext) {
-		val query = input.asInstanceOf[Dataset[_]].writeStream.options(args).format(format)
-			.outputMode(outputMode).queryName(DoWriteStream.getNextQueryId).start();
-		query.awaitTermination();
-	}
-}
-
-case class DoZip[X: Encoder, Y: Encoder]()(implicit ct: ClassTag[Y], en: Encoder[(X, Y)]) extends ProcessorN21 {
-	def getInPortNames(): Seq[String] = DEFAULT_IN_PORT_NAMES(2);
-
-	def perform(inputs: Map[String, _], ctx: RunnerContext): Dataset[(X, Y)] = {
-		val ds1: Dataset[X] = inputs(getInPortNames()(0)).asInstanceOf[Dataset[X]];
-		val ds2: Dataset[Y] = inputs(getInPortNames()(1)).asInstanceOf[Dataset[Y]];
-		ds1.sparkSession.createDataset(ds1.rdd.zip(ds2.rdd));
-	}
-}
-

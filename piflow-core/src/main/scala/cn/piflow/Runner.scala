@@ -15,6 +15,8 @@ trait Logging {
 trait RunnerContext {
   def apply[T](name: String): T;
 
+  def isDefined(name: String): Boolean;
+
   def forType[T: ClassTag](implicit m: Manifest[T]): T =
     apply(m.runtimeClass.getName);
 

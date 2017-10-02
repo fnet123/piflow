@@ -1,8 +1,8 @@
 import java.util._
 
 import cn.piflow._
-import cn.piflow.dsl._
 import cn.piflow.io._
+import cn.piflow.dsl._
 import cn.piflow.processor._
 import cn.piflow.processor.ds._
 import cn.piflow.shell._
@@ -22,12 +22,12 @@ object PRELOAD_CODES {
 
   private def TEST_IMPORTS_WILL_NEVER_USED() {
     if (false) {
-      val piped: PipedProcessorNode = SeqAsSource(1, 2, 3, 4);
+      val piped: NamedSource = SeqAsSource(1, 2, 3, 4);
       toGraph(piped);
       new Date();
       val pl = SeqAsSource(1, 2, 3, 4) > DoMap[Int, Int](_ + 1) > DoSleep(30000) > ConsoleSink();
       pl !;
-      pl !@ Schedule.startNow()
+      pl !@(Start.now)
     }
   }
 }

@@ -18,66 +18,61 @@ class DslTest {
 
   @Test
   def testFlowSequence() = {
-    val mem1 = Ref();
-    val mem2 = Ref();
-    val node = NodeRef();
+    val ref1 = SinkRef();
 
     val line = SeqAsSource(1, 2, 3, 4) / "_1:_1" >
       DoMap[Int, Int](_ + 1) >
-      MemorySink() % node % mem1 % mem2;
+      MemorySink() % ref1;
 
     line.show();
     runner.run(line);
-    Assert.assertEquals(Seq(2, 3, 4, 5), mem1.as[MemorySink].as[Int]);
-    Assert.assertEquals(mem1.as[MemorySink], mem2.as[MemorySink]);
-    Assert.assertEquals(classOf[DoWrite], node.get.processorNode.processor.getClass);
+    Assert.assertEquals(Seq(2, 3, 4, 5), ref1.as[MemorySink].as[Int]);
+    Assert.assertEquals(ref1.as[MemorySink], ref1.get);
+    Assert.assertEquals(classOf[DoWrite], ref1.node.processorNode.processor.getClass);
   }
 
   @Test
   def testFlowSequence2() = {
-    val source = Ref();
-    val mem1 = Ref();
-    val mem2 = Ref();
-    val node1 = NodeRef();
-    val node2 = NodeRef();
-    val node3 = NodeRef();
+    val ref1 = SourceRef();
+    val ref2 = ProcessorRef();
+    val ref3 = SinkRef();
 
-    val line = SeqAsSource(1, 2, 3, 4) % source / "_1:_1" >
-      DoMap[Int, Int](_ + 1) % node2 >
-      MemorySink() % node3 % mem1 % mem2;
+    val line = SeqAsSource(1, 2, 3, 4) % ref1 / "_1:_1" >
+      DoMap[Int, Int](_ + 1) % ref2 >
+      MemorySink() % ref3;
 
     runner.run(line);
-    Assert.assertEquals(SeqAsSource(1, 2, 3, 4), source.get);
-    Assert.assertEquals(Seq(2, 3, 4, 5), mem1.as[MemorySink].as[Int]);
-    Assert.assertEquals(mem1.as[MemorySink], mem2.as[MemorySink]);
-    Assert.assertEquals(classOf[_DoLoadSource], node1.get.processorNode.processor.getClass);
-    Assert.assertEquals(classOf[DoMap[Int, Int]], node2.get.processorNode.processor.getClass);
-    Assert.assertEquals(classOf[DoWrite], node3.get.processorNode.processor.getClass);
+    Assert.assertEquals(SeqAsSource(1, 2, 3, 4), ref1.get);
+    Assert.assertEquals(Seq(2, 3, 4, 5), ref3.as[MemorySink].as[Int]);
+    Assert.assertEquals(ref3.as[MemorySink], ref3.as[MemorySink]);
+    Assert.assertEquals(classOf[_DoLoadSource], ref1.node.processorNode.processor.getClass);
+    Assert.assertEquals(classOf[DoMap[Int, Int]], ref2.node.processorNode.processor.getClass);
+    Assert.assertEquals(classOf[DoWrite], ref3.node.processorNode.processor.getClass);
   }
 
   @Test
   def testFlowFork() = {
-    val mem1 = Ref();
-    val mem2 = Ref();
-    val forkNode = NodeRef();
+    val ref1 = SinkRef();
+    val ref2 = SinkRef();
+    val forkNode = ProcessorRef();
 
     val line = SeqAsSource(1, 2, 3, 4) >
       DoFork[Int](_ % 2 == 0, _ % 2 == 1) % forkNode >
-      MemorySink() % mem1;
+      MemorySink() % ref1;
 
-    forkNode / "_2:_1" > MemorySink() % mem2;
+    forkNode / "_2:_1" > MemorySink() % ref2;
 
     val runner = Runner.sparkRunner(spark);
     line.show();
     runner.run(line);
-    Assert.assertEquals(Seq(2, 4), mem1.as[Int]);
-    Assert.assertEquals(Seq(1, 3), mem2.as[Int]);
+    Assert.assertEquals(Seq(2, 4), ref1.as[MemorySink].as[Int]);
+    Assert.assertEquals(Seq(1, 3), ref2.as[MemorySink].as[Int]);
   }
 
   @Test
   def testFlowMerge() = {
-    val mem = Ref();
-    val zipNode = NodeRef();
+    val mem = SinkRef();
+    val zipNode = ProcessorRef();
 
     val line1 = SeqAsSource(1, 2, 3, 4) >
       DoMap[Int, Int](_ + 10) >
@@ -95,8 +90,8 @@ class DslTest {
 
   @Test
   def testFlowMerge2() = {
-    val mem = Ref();
-    val zipNode = NodeRef();
+    val mem = SinkRef();
+    val zipNode = ProcessorRef();
 
     val line1 = SeqAsSource(1, 2, 3, 4) >
       DoMap[Int, Int](_ + 10) >
@@ -116,8 +111,8 @@ class DslTest {
 
   @Test
   def testFlowForkMerge() = {
-    val mem = Ref();
-    val mergeNode = NodeRef();
+    val mem = SinkRef();
+    val mergeNode = ProcessorRef();
 
     val line1 = SeqAsSource(1, 2, 3, 4) >
       DoFork[Int](_ % 2 == 0, _ % 2 == 1) >

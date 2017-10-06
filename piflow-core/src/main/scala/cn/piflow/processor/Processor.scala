@@ -8,11 +8,11 @@ import cn.piflow.RunnerContext
 
 trait Processor {
   def DEFAULT_IN_PORT_NAMES(n: Int): Seq[String] = {
-    (1 to n).map("in:_" + _);
+    (1 to n).map("_" + _);
   }
 
   def DEFAULT_OUT_PORT_NAMES(n: Int): Seq[String] = {
-    (1 to n).map("out:_" + _);
+    (1 to n).map("_" + _);
   }
 }
 

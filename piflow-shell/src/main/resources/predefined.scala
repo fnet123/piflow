@@ -22,10 +22,9 @@ object PRELOAD_CODES {
 
   private def TEST_IMPORTS_WILL_NEVER_USED() {
     if (false) {
-      val piped: NamedSource = SeqAsSource(1, 2, 3, 4);
-      toGraph(piped);
       new Date();
       val pl = SeqAsSource(1, 2, 3, 4) > DoMap[Int, Int](_ + 1) > DoSleep(30000) > ConsoleSink();
+      node2Graph(pl);
       pl !;
       pl !@(Start.now)
     }

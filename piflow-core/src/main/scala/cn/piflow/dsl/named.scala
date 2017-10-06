@@ -3,6 +3,8 @@ package cn.piflow.dsl
 import cn.piflow.FlowGraph
 import cn.piflow.io.{BatchSource, Sink}
 import cn.piflow.processor.Processor
+import cn.piflow.processor.io.{DoLoad, DoWrite}
+import org.apache.spark.sql.streaming.OutputMode
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -13,21 +15,15 @@ import scala.collection.mutable.ArrayBuffer
 //Named wraps a Processor, enables naming, assigning port names
 //SeqAsSource(...) % sourceRef / "_1:_1"
 
-abstract class Named[T](val value: T) {
+abstract class Named[T](val value: AnyRef) {
   var ports = "_1" -> "_1";
-  val nodes = ArrayBuffer[NodeRef]();
-
-  def %(ref: NodeRef): this.type = as(ref);
-
-  def as(ref: NodeRef): this.type = {
-    nodes += ref;
-    this;
-  }
+  val nodes = ArrayBuffer[Ref]();
 
   def %(ref: Ref): this.type = as(ref);
 
   def as(ref: Ref): this.type = {
-    ref() = value;
+    nodes += ref;
+    ref.bindValue(this.value);
     this;
   }
 
@@ -37,28 +33,25 @@ abstract class Named[T](val value: T) {
     this;
   }
 
-  def getProcessor(): Processor;
+  def createProcessor(append: Boolean): Processor;
 
   def bindProcessorNode(node: PipedProcessorNode) = {
-    nodes.foreach(_.update(node));
+    nodes.foreach(_.bindNode(node));
   }
 
-  def getGraph() = new FlowGraph();
-
-  //TODO: extract a trait
-  //TODO: Append or Complete
+  //TODO: extract a trait Piped
   def >>(sink: NamedSink): PipedProcessorNode = {
-    pipeNext(sink);
+    pipeNext(sink, true);
   }
 
   def >(sink: NamedSink): PipedProcessorNode = {
-    pipeNext(sink);
+    pipeNext(sink, false);
   }
 
   //DoWrite(sink.value, OutputMode.Complete), sink.value
 
   def >(processor: NamedProcessor): PipedProcessorNode = {
-    pipeNext(processor);
+    pipeNext(processor, false);
   }
 
   /*
@@ -68,28 +61,40 @@ abstract class Named[T](val value: T) {
   }
   */
 
+def getOrCreateNode(append: Boolean):PipedProcessorNode={
+  val flowGraph = new FlowGraph();
+  val processorNode = flowGraph.createNode(createProcessor(append));
+  new PipedProcessorNode(flowGraph, processorNode, value, this);
+}
 
-  def pipeNext(successor: Named[_]): PipedProcessorNode = {
-    val flowGraph = getGraph();
-    val processorNode = flowGraph.createNode(getProcessor());
-    val successorNode = flowGraph.createNode(successor.getProcessor());
+  def pipeNext(successor: Named[_], append: Boolean): PipedProcessorNode = {
+    val ppn = getOrCreateNode(append);
+    val flowGraph = ppn.flowGraph;
+    val processorNode = ppn.processorNode;
+
+    val successorNode = flowGraph.createNode(successor.createProcessor(append));
     flowGraph.link(processorNode, successorNode, ports);
-    val ppn1 = new PipedProcessorNode(flowGraph, processorNode, value, this);
-    this.bindProcessorNode(ppn1);
-    val ppn2 = new PipedProcessorNode(flowGraph, successorNode, successor.value, successor);
-    successor.bindProcessorNode(ppn2);
-    ppn2;
+
+    this.bindProcessorNode(ppn);
+    val piped = new PipedProcessorNode(flowGraph, successorNode, successor.value, successor);
+    successor.bindProcessorNode(piped);
+    piped;
   }
 }
 
-class NamedSink(value: Sink) extends Named[Sink](value) {
-  def getProcessor(): Processor = null;
+class NamedSink(sink: Sink) extends Named[Sink](sink) {
+  def createProcessor(append: Boolean): Processor = {
+    if (append)
+      DoWrite(sink, OutputMode.Append);
+    else
+      DoWrite(sink, OutputMode.Complete);
+  }
 }
 
-class NamedSource(value: BatchSource) extends Named[BatchSource](value) {
-  def getProcessor(): Processor = null;
+class NamedSource(source: BatchSource) extends Named[BatchSource](source) {
+  def createProcessor(append: Boolean): Processor = DoLoad(source);
 }
 
-class NamedProcessor(value: Processor) extends Named[Processor](value) {
-  def getProcessor(): Processor = null;
+class NamedProcessor(processor: Processor) extends Named[Processor](processor) {
+  def createProcessor(append: Boolean): Processor = processor;
 }

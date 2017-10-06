@@ -28,7 +28,7 @@ trait Runner {
 
   def schedule(flowGraph: FlowGraph, schedule: JobSchedule): ScheduledJob;
 
-  def schedule(flowGraph: FlowGraph, start: Start.Builder = Start.now, run: Repeat.Builder = Repeat.once): ScheduledJob;
+  def schedule(flowGraph: FlowGraph, start: Start.Builder = Start.now, repeat: Repeat.Builder = Repeat.once): ScheduledJob;
 
   /**
     * run a flow graph until termination

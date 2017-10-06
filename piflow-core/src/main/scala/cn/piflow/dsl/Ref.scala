@@ -1,27 +1,28 @@
 package cn.piflow.dsl
 
-import cn.piflow.io.{BatchSource, Sink}
-import cn.piflow.processor.Processor
-import cn.piflow.processor.io.DoWrite
-import cn.piflow.{FlowException, FlowGraph, ProcessorNode}
-import org.apache.spark.sql.streaming.OutputMode
-
-import scala.collection.mutable.ArrayBuffer
-
 /**
   * @author bluejoe2008@gmail.com
   */
-trait RefTrait[T] {
-  protected var value: T = null.asInstanceOf[T];
+trait Ref {
+  private var _value: AnyRef = _;
+  private var _node: PipedProcessorNode = _;
 
-  def update(t: T) = value = t;
+  def bindValue(value: AnyRef) = this._value = value;
 
-  def get: T = value;
+  def bindNode(node: PipedProcessorNode) = this._node = node;
+
+  def get: AnyRef = _value;
+
+  def as[T]: T = _value.asInstanceOf[T];
+
+  def node: PipedProcessorNode = _node;
 }
 
-case class Ref() extends RefTrait[Any] {
-  def as[T]: T = value.asInstanceOf[T];
+case class SourceRef() extends Ref {
 }
 
-case class NodeRef() extends RefTrait[PipedProcessorNode] {
+case class SinkRef() extends Ref {
+}
+
+case class ProcessorRef() extends Ref {
 }

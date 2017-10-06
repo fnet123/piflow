@@ -38,6 +38,11 @@ class RunnableFlowGraph(flowGraph: FlowGraph)(implicit runner: Runner) {
     printScheduledJobInfo(job);
   }
 
+  def !@(start: Start.Builder = Start.now, repeat: Repeat.Builder = Repeat.once) = {
+    val job = runner.schedule(flowGraph, start, repeat);
+    printScheduledJobInfo(job);
+  }
+
   def !@(cronExpression: String) = {
     val job = runner.schedule(flowGraph, Start.now, Repeat.cronedly(cronExpression));
     printScheduledJobInfo(job);

@@ -1,10 +1,16 @@
 package cn.piflow.runner
 
 import cn.piflow.processor.ProcessorN2N
-import cn.piflow.{FlowGraph, Logging, RunnerContext}
+import cn.piflow.{FlowException, FlowGraph, Logging, RunnerContext}
 import org.apache.spark.sql.SparkSession
 
 import scala.collection.JavaConversions.asScalaSet
+
+class JobExecutionException(currentNodeId: Integer, predecessorNodeId: Integer, ports: (String, String), cause: Throwable)
+  extends FlowException(s"fail to execute job, currentNodeId=$currentNodeId, predecessorNodeId=$predecessorNodeId, ports=$ports",
+    cause) {
+
+}
 
 class MapAsRunnerContext(map: scala.collection.mutable.Map[String, Any]) extends RunnerContext {
   def apply[T](name: String): T = map(name).asInstanceOf[T];
@@ -46,12 +52,19 @@ object JobExecutor extends Logging {
       val predecessorNodeIds = flow.graph.predecessors(nodeId);
       for (predecessorNodeId ← predecessorNodeIds) {
         val edgeValue = flow.graph.edgeValue(predecessorNodeId, nodeId).get;
-        val outputs = visitNode(flow, predecessorNodeId, visitedNodes, ctx);
-        if (edgeValue._1 != null && edgeValue._2 != null)
-          inputs += (edgeValue._2 -> outputs(edgeValue._1));
+        try {
+          val outputs = visitNode(flow, predecessorNodeId, visitedNodes, ctx);
+          if (edgeValue._1 != null && edgeValue._2 != null) {
+            inputs += (edgeValue._2 -> outputs(edgeValue._1));
+          }
+        }
+        catch {
+          case e: Throwable => throw new JobExecutionException(nodeId, predecessorNodeId, edgeValue, e);
+        }
       }
 
-      val outputs = ProcessorN2N.fromUnknown(thisNode.processor).performN2N(inputs.toMap, ctx);
+      val outputs = ProcessorN2N.fromUnknown(thisNode.processor).
+        performN2N(inputs.toMap, ctx);
       visitedNodes(nodeId) = outputs;
       outputs;
     }

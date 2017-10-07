@@ -1,6 +1,7 @@
 package cn.piflow
 
 import java.io.{File, FileWriter}
+
 import cn.piflow.io.{MemorySink, SeqAsSource}
 import cn.piflow.processor.ds.{DoFilter, DoFork, DoMap, DoMerge, DoZip}
 import cn.piflow.processor.io.{DoLoad, DoWrite}
@@ -12,6 +13,7 @@ class BatchFlowTest {
   val spark = SparkSession.builder.master("local[4]")
     .getOrCreate();
   spark.conf.set("spark.sql.streaming.checkpointLocation", "/tmp");
+
   import spark.implicits._
 
   @Test
@@ -21,8 +23,8 @@ class BatchFlowTest {
     val node2 = fg.createNode(DoMap[Int, Int](_ + 1));
     val mem = MemorySink();
     val node3 = fg.createNode(DoWrite(mem));
-    fg.link(node1, node2, ("out:_1", "in:_1"));
-    fg.link(node2, node3, ("out:_1", "in:_1"));
+    fg.link(node1, node2, ("_1", "_1"));
+    fg.link(node2, node3, ("_1", "_1"));
     fg.show();
 
     val runner = Runner.sparkRunner(spark);
@@ -40,7 +42,7 @@ class BatchFlowTest {
     val node1 = fg.createNode(DoLoad("text", Map("path" -> "./abc.txt")));
     val mem = MemorySink();
     val node2 = fg.createNode(DoWrite(mem));
-    fg.link(node1, node2, ("out:_1", "in:_1"));
+    fg.link(node1, node2, ("_1", "_1"));
     fg.show();
 
     val runner = Runner.sparkRunner(spark);
@@ -57,9 +59,9 @@ class BatchFlowTest {
     val node3 = fg.createNode(DoWrite(mem1));
     val mem2 = MemorySink();
     val node4 = fg.createNode(DoWrite(mem2));
-    fg.link(node1, node2, ("out:_1", "in:_1"));
-    fg.link(node2, node3, ("out:_1", "in:_1"));
-    fg.link(node2, node4, ("out:_2", "in:_1"));
+    fg.link(node1, node2, ("_1", "_1"));
+    fg.link(node2, node3, ("_1", "_1"));
+    fg.link(node2, node4, ("_2", "_1"));
     fg.show();
 
     val runner = Runner.sparkRunner(spark);
@@ -79,11 +81,11 @@ class BatchFlowTest {
     val node5 = fg.createNode(DoZip[Int, String]());
     val mem = MemorySink();
     val node6 = fg.createNode(DoWrite(mem));
-    fg.link(node1, node3, ("out:_1", "in:_1"));
-    fg.link(node2, node4, ("out:_1", "in:_1"));
-    fg.link(node3, node5, ("out:_1", "in:_1"));
-    fg.link(node4, node5, ("out:_1", "in:_2"));
-    fg.link(node5, node6, ("out:_1", "in:_1"));
+    fg.link(node1, node3, ("_1", "_1"));
+    fg.link(node2, node4, ("_1", "_1"));
+    fg.link(node3, node5, ("_1", "_1"));
+    fg.link(node4, node5, ("_1", "_2"));
+    fg.link(node5, node6, ("_1", "_1"));
     fg.show();
 
     val runner = Runner.sparkRunner(spark);
@@ -106,13 +108,13 @@ class BatchFlowTest {
     val node7 = fg.createNode(DoMerge[String]());
     val mem = MemorySink();
     val node8 = fg.createNode(DoWrite(mem));
-    fg.link(node1, node4, ("out:_1", "in:_1"));
-    fg.link(node4, node5, ("out:_1", "in:_1"));
-    fg.link(node2, node3, ("out:_1", "in:_1"));
-    fg.link(node3, node6, ("out:_1", "in:_1"));
-    fg.link(node5, node7, ("out:_1", "in:_1"));
-    fg.link(node6, node7, ("out:_1", "in:_2"));
-    fg.link(node7, node8, ("out:_1", "in:_1"));
+    fg.link(node1, node4, ("_1", "_1"));
+    fg.link(node4, node5, ("_1", "_1"));
+    fg.link(node2, node3, ("_1", "_1"));
+    fg.link(node3, node6, ("_1", "_1"));
+    fg.link(node5, node7, ("_1", "_1"));
+    fg.link(node6, node7, ("_1", "_2"));
+    fg.link(node7, node8, ("_1", "_1"));
     //node2 is isolated
     fg.show();
 

@@ -1,7 +1,7 @@
 package cn.piflow.runner
 
 import cn.piflow.Logging
-import org.quartz.{JobExecutionContext, JobExecutionException, JobListener}
+import org.quartz.{JobExecutionContext, JobExecutionException => QuartzJobExecutionException, JobListener}
 
 /**
   * @author bluejoe2008@gmail.com
@@ -17,7 +17,7 @@ class JobListenerImpl() extends JobListener with Logging {
   }
 
   def jobWasExecuted(context: JobExecutionContext,
-                     jobException: JobExecutionException) {
+                     jobException: QuartzJobExecutionException) {
     logger.debug(String.format("job executed: %s, scheduledJob: %s", context.getFireInstanceId, context.getTrigger.getKey.getName));
   }
 }

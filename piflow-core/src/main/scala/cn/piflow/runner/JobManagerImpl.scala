@@ -17,6 +17,8 @@ class JobManagerImpl(scheduler: Scheduler, teg: TriggerExtraGroup) extends JobMa
     scheduler.getTrigger(jobId2TriggerKey(jobId)) != null;
   }
 
+  private def jobId2TriggerKey(jobId: String) = new TriggerKey(jobId, classOf[FlowGraph].getName);
+
   def getHistoricExecutions(jobId: String) = {
     teg.getHistoricExecutions().filter(_.getTrigger.getKey.getName.equals(jobId)).map {
       new JobInstanceImpl(_);
@@ -52,8 +54,6 @@ class JobManagerImpl(scheduler: Scheduler, teg: TriggerExtraGroup) extends JobMa
   def resume(jobId: String) = {
     scheduler.resumeTrigger(jobId2TriggerKey(jobId));
   }
-
-  private def jobId2TriggerKey(jobId: String) = new TriggerKey(jobId, classOf[FlowGraph].getName);
 
   def pause(jobId: String) = {
     scheduler.pauseTrigger(jobId2TriggerKey(jobId));

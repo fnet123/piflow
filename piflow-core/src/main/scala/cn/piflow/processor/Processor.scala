@@ -113,7 +113,8 @@ object ProcessorN2N {
     override def getOutPortNames(): Seq[String] = Seq(processor.getOutPortName());
 
     override def performN2N(inputs: Map[String, _], ctx: RunnerContext): Map[String, _] =
-      Map(processor.getOutPortName() -> processor.perform(inputs(processor.getInPortName()), ctx));
+      Map(processor.getOutPortName() ->
+        processor.perform(inputs(processor.getInPortName()), ctx));
   }
 
   def from(processor: Processor021): ProcessorN2N = new ProcessorN2N {

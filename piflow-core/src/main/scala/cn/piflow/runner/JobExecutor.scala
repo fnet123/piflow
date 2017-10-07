@@ -25,6 +25,7 @@ object JobExecutor extends Logging {
 
   def executeFlowGraph(flowGraph: FlowGraph) {
     val endNodes = flowGraph.graph.nodes().filter(flowGraph.graph.successors(_).isEmpty());
+    logger.debug(s"end nodes: $endNodes");
 
     val ctx: RunnerContext = createRunnerContext();
     //TODO: analyze flow graph
@@ -44,8 +45,6 @@ object JobExecutor extends Logging {
     }
     else {
       val thisNode = flow.node(nodeId);
-      logger.debug(s"visiting node: $nodeId");
-
       val inputs = collection.mutable.Map[String, Any]();
 
       //predecessors
@@ -63,8 +62,10 @@ object JobExecutor extends Logging {
         }
       }
 
-      val outputs = ProcessorN2N.fromUnknown(thisNode.processor).
-        performN2N(inputs.toMap, ctx);
+      val processor = thisNode.processor;
+      logger.debug(s"visiting node: $processor, node id: $nodeId");
+      val outputs = ProcessorN2N.fromUnknown(processor).performN2N(inputs.toMap, ctx);
+      logger.debug(s"visited node: $processor, node id: $nodeId");
       visitedNodes(nodeId) = outputs;
       outputs;
     }

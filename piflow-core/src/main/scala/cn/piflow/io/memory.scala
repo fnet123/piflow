@@ -39,14 +39,14 @@ case class MemorySink(outputMode: OutputMode = OutputMode.Append) extends BatchS
     _.apply(0).asInstanceOf[T];
   }
 
+  def asSeq: Seq[Seq[_]] = asRow.map {
+    _.toSeq;
+  }
+
   def asRow: Seq[Row] = {
     if (optionSparkMemorySink.isDefined)
       optionSparkMemorySink.get.allData;
     else
       Seq[Row]();
   };
-
-  def asSeq: Seq[Seq[_]] = asRow.map {
-    _.toSeq;
-  }
 }

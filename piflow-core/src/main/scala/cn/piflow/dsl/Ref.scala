@@ -1,28 +1,41 @@
 package cn.piflow.dsl
 
+import cn.piflow.ProcessorNode
+import cn.piflow.io.{BatchSource, Sink}
+import cn.piflow.processor.Processor
+
 /**
   * @author bluejoe2008@gmail.com
   */
-trait Ref {
-  private var _value: AnyRef = _;
-  private var _node: PipedProcessorNode = _;
+trait Ref[T] {
+  type BoundType <: BoundNode[T];
 
-  def bindValue(value: AnyRef) = this._value = value;
+  private var _bound: BoundType = null.asInstanceOf[BoundType];
+  private var _node: ProcessorNode = null.asInstanceOf[ProcessorNode];
 
-  def bindNode(node: PipedProcessorNode) = this._node = node;
+  def bind(bound: BoundType) = _bound = bound;
 
-  def get: AnyRef = _value;
+  def bind(node: ProcessorNode) = _node = node;
 
-  def as[T]: T = _value.asInstanceOf[T];
+  def as[T]: T = get.asInstanceOf[T];
 
-  def node: PipedProcessorNode = _node;
+  def get: T = _bound.userData;
+
+  def bound: BoundType = _bound;
+
+  def node: ProcessorNode = _node;
+
+  def processor: Processor = _node.processor;
 }
 
-case class SourceRef() extends Ref {
+case class SourceRef() extends Ref[BatchSource] {
+  override type BoundType = BoundSource;
 }
 
-case class SinkRef() extends Ref {
+case class SinkRef() extends Ref[Sink] {
+  override type BoundType = BoundSink;
 }
 
-case class ProcessorRef() extends Ref {
+case class ProcessorRef() extends Ref[Processor] {
+  override type BoundType = BoundProcessor;
 }

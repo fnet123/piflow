@@ -41,7 +41,8 @@ case class DoTransform[X, Y](fn: X ⇒ Y) extends Processor121 {
   }
 }
 
-case class DoFlatMap[X: Encoder, Y: Encoder](fn: X ⇒ TraversableOnce[Y]) extends Processor121 {
+case class DoFlatMap[X: Encoder, Y: Encoder](fn: X ⇒ TraversableOnce[Y])
+  extends Processor121 {
   def perform(input: Any, ctx: RunnerContext): Dataset[Y] = {
     input.asInstanceOf[Dataset[X]].flatMap(fn);
   }

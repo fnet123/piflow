@@ -4,34 +4,67 @@ import cn.piflow.io.{BatchSource, Sink}
 import cn.piflow.processor.Processor
 
 package object dsl {
-  implicit def piped(nodes: Seq[Named[_]]) =
-    new PipedProcessorNodeSeq(nodes);
+  implicit def withPorts(value: Processor): ProcessorArrow =
+    withPorts(bound(value));
 
-  /*
-    implicit def piped(source: BatchSource): PipedProcessorNode = {
-      val flowGraph = new FlowGraph();
-      val processor = DoLoad(source);
-      val processorNode = flowGraph.createNode(processor);
-      val ppn = new PipedProcessorNode(flowGraph, processorNode, source, named(source));
-      new NamedSource(source).bindProcessorNode(ppn);
-      ppn;
-    }
-  */
+  implicit def withPorts(bound: BoundProcessor): ProcessorArrow =
+    new ProcessorArrow(bound);
+
+  implicit def withPorts(value: Sink): SinkArrow =
+    withPorts(bound(value));
+
   //convert source/sink/processor to Named first
-  implicit def named(value: Sink): NamedSink =
-    new NamedSink(value);
+  implicit def bound(value: Sink): BoundSink =
+    new BoundSink(value);
 
-  implicit def named(value: BatchSource): NamedSource =
-    new NamedSource(value);
+  implicit def withPorts(bound: BoundSink): SinkArrow =
+    new SinkArrow(bound);
 
-  implicit def named(value: Processor): NamedProcessor =
-    new NamedProcessor(value);
+  implicit def withPorts(value: BatchSource): SourceArrow =
+    withPorts(bound(value));
 
-  implicit def named(ref: SinkRef): NamedSink = ref.node.named.asInstanceOf[NamedSink];
-  implicit def named(ref: SourceRef): NamedSource = ref.node.named.asInstanceOf[NamedSource];
-  implicit def named(ref: ProcessorRef): NamedProcessor = ref.node.named.asInstanceOf[NamedProcessor];
+  implicit def bound(value: BatchSource): BoundSource =
+    new BoundSource(value);
 
-  implicit def named(node: PipedProcessorNode): Named[_] = node.named;
+  implicit def withPorts(bound: BoundSource): SourceArrow =
+    new SourceArrow(bound);
 
-  implicit def node2Graph(node: PipedProcessorNode): FlowGraph = node.flowGraph;
+  implicit def chained2Graph(chain: ChainWithTail[_]): FlowGraph = {
+    val flowGraph = new FlowGraph();
+    chain.bindFlowGraph(flowGraph);
+    flowGraph;
+  }
+
+  implicit def ref2Node(ref: SinkRef): BoundSink = ref.bound;
+
+  implicit def ref2Node(ref: SourceRef): BoundSource = ref.bound;
+
+  implicit def ref2Node(ref: ProcessorRef): BoundProcessor = ref.bound;
+
+  implicit def piped[X](nodes: Seq[Arrow[X]]) =
+    new ArrowSeq[X](nodes);
+
+  implicit def chain2Bound(chain: ChainWithProcessorAsTail): BoundProcessor =
+    chain.successor.bound.asInstanceOf[BoundProcessor];
+
+  implicit def chain2Bound(chain: ChainWithSourceAsTail): BoundSource =
+    chain.successor.bound.asInstanceOf[BoundSource];
+
+  implicit def chain2Bound(chain: ChainWithSinkAsTail): BoundSink =
+    chain.successor.bound.asInstanceOf[BoundSink];
+
+  //single node graph
+  implicit def asGraph(value: Processor): FlowGraph = {
+    asGraph(bound(value));
+  }
+
+  implicit def bound(value: Processor): BoundProcessor =
+    new BoundProcessor(value);
+
+  implicit def asGraph(bound: BoundProcessor): FlowGraph = {
+    val flowGraph = new FlowGraph();
+    val node = flowGraph.createNode(bound.createProcessor());
+    bound.notifyRefs(node);
+    flowGraph;
+  }
 }

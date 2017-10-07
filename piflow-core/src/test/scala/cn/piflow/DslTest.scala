@@ -2,6 +2,7 @@ package cn.piflow
 
 import cn.piflow.dsl._
 import cn.piflow.io.{MemorySink, SeqAsSource}
+import cn.piflow.processor.DoSleep
 import cn.piflow.processor.ds._
 import cn.piflow.processor.io.{DoWrite, _DoLoadSource}
 import org.apache.spark.sql.SparkSession
@@ -17,6 +18,20 @@ class DslTest {
   implicit val runner = Runner.sparkRunner(spark);
 
   @Test
+  def testSingleNodeFlow() = {
+    val line1 = DoSleep(3000);
+    val ref1 = ProcessorRef();
+    val line2 = DoSleep(3000) % ref1
+
+    line1.show();
+    runner.run(line1);
+
+    line2.show();
+    runner.run(line2);
+    Assert.assertEquals(classOf[DoSleep], ref1.processor.getClass);
+  }
+
+  @Test
   def testFlowSequence() = {
     val ref1 = SinkRef();
 
@@ -28,7 +43,7 @@ class DslTest {
     runner.run(line);
     Assert.assertEquals(Seq(2, 3, 4, 5), ref1.as[MemorySink].as[Int]);
     Assert.assertEquals(ref1.as[MemorySink], ref1.get);
-    Assert.assertEquals(classOf[DoWrite], ref1.node.processorNode.processor.getClass);
+    Assert.assertEquals(classOf[DoWrite], ref1.processor.getClass);
   }
 
   @Test
@@ -45,9 +60,9 @@ class DslTest {
     Assert.assertEquals(SeqAsSource(1, 2, 3, 4), ref1.get);
     Assert.assertEquals(Seq(2, 3, 4, 5), ref3.as[MemorySink].as[Int]);
     Assert.assertEquals(ref3.as[MemorySink], ref3.as[MemorySink]);
-    Assert.assertEquals(classOf[_DoLoadSource], ref1.node.processorNode.processor.getClass);
-    Assert.assertEquals(classOf[DoMap[Int, Int]], ref2.node.processorNode.processor.getClass);
-    Assert.assertEquals(classOf[DoWrite], ref3.node.processorNode.processor.getClass);
+    Assert.assertEquals(classOf[_DoLoadSource], ref1.processor.getClass);
+    Assert.assertEquals(classOf[DoMap[Int, Int]], ref2.processor.getClass);
+    Assert.assertEquals(classOf[DoWrite], ref3.processor.getClass);
   }
 
   @Test
@@ -84,6 +99,7 @@ class DslTest {
       zipNode;
 
     val runner = Runner.sparkRunner(spark);
+    line1.show();
     runner.run(line1);
     Assert.assertEquals(Seq(Seq(11, "A"), Seq(12, "B"), Seq(13, "C"), Seq(14, "D")), mem.as[MemorySink].asSeq);
   }
@@ -94,8 +110,7 @@ class DslTest {
     val zipNode = ProcessorRef();
 
     val line1 = SeqAsSource(1, 2, 3, 4) >
-      DoMap[Int, Int](_ + 10) >
-      DoZip[Int, String]();
+      DoMap[Int, Int](_ + 10);
 
     val line2 = SeqAsSource("a", "b", "c", "d") >
       DoMap[String, String](_.toUpperCase());
@@ -105,8 +120,10 @@ class DslTest {
       MemorySink() % mem;
 
     val runner = Runner.sparkRunner(spark);
+    line3.show();
     runner.run(line3);
-    Assert.assertEquals(Seq(Seq(11, "A"), Seq(12, "B"), Seq(13, "C"), Seq(14, "D")), mem.as[MemorySink].asSeq);
+    Assert.assertEquals(Seq(Seq(11, "A"), Seq(12, "B"), Seq(13, "C"), Seq(14, "D")),
+      mem.as[MemorySink].asSeq);
   }
 
   @Test
@@ -118,7 +135,7 @@ class DslTest {
       DoFork[Int](_ % 2 == 0, _ % 2 == 1) >
       DoMap[Int, String](x ⇒ (x + 10).toString()) >
       DoMerge[String]() % mergeNode >
-      MemorySink();
+      MemorySink() % mem;
 
     SeqAsSource("a", "b", "c", "d") >
       DoMap[String, String](_.toUpperCase()) >
@@ -126,9 +143,10 @@ class DslTest {
       mergeNode;
 
     val runner = Runner.sparkRunner(spark);
+    line1.show();
     runner.run(line1);
 
-    Assert.assertEquals(Seq("12", "14", "A", "B"), mem.as[String]);
+    Assert.assertEquals(Seq("12", "14", "A", "B"), mem.as[MemorySink].as[String]);
   }
 }
 

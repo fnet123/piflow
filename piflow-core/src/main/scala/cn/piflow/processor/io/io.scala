@@ -52,7 +52,8 @@ case class DoLoadStream2(source: StreamSource) extends Processor021 {
 }
 */
 
-case class DoWrite(sink: Sink, outputMode: OutputMode = OutputMode.Complete) extends Processor120 {
+case class DoWrite(sink: Sink, outputMode: OutputMode = OutputMode.Complete)
+  extends Processor120 {
   override def perform(input: Any, ctx: RunnerContext) {
     val ds: Dataset[_] = input.asInstanceOf[Dataset[_]];
     if (ds.isStreaming)
@@ -63,16 +64,18 @@ case class DoWrite(sink: Sink, outputMode: OutputMode = OutputMode.Complete) ext
 
   def performStream(ss: StreamSink, ds: Dataset[_], ctx: RunnerContext) {
     val df = ds.toDF();
-    val query = df.sparkSession.doGet("sessionState").doGet("streamingQueryManager").doCall("startQuery")(
-      DoWrite.getNextQueryId,
-      ctx("checkpointLocation").asInstanceOf[String],
-      df,
-      asSparkStreamSink(ss, ctx),
-      outputMode,
-      ss.useTempCheckpointLocation(outputMode, ctx),
-      ss.recoverFromCheckpointLocation(outputMode, ctx),
-      ProcessingTime(0) //start now
-    ).asInstanceOf[StreamingQuery];
+    val query = df.sparkSession.doGet("sessionState").
+      doGet("streamingQueryManager").
+      doCall("startQuery")(
+        DoWrite.getNextQueryId,
+        ctx("checkpointLocation").asInstanceOf[String],
+        df,
+        asSparkStreamSink(ss, ctx),
+        outputMode,
+        ss.useTempCheckpointLocation(outputMode, ctx),
+        ss.recoverFromCheckpointLocation(outputMode, ctx),
+        ProcessingTime(0) //start now
+      ).asInstanceOf[StreamingQuery];
 
     query.awaitTermination();
   }

@@ -1,13 +1,14 @@
 package cn.piflow
 
-import cn.piflow.dsl.PipedProcessorNode
+import cn.piflow.dsl.BoundNode
+import cn.piflow.dsl._
 
 package object shell {
 	implicit def toRunnable(flowGraph: FlowGraph)(implicit runner: Runner) = {
 		new RunnableFlowGraph(flowGraph);
 	}
 
-	implicit def toRunnable(node: PipedProcessorNode)(implicit runner: Runner) = {
-		new RunnableFlowGraph(node.flowGraph);
+	implicit def toRunnable(node: ChainWithTail[_])(implicit runner: Runner) = {
+		new RunnableFlowGraph(chained2Graph(node));
 	}
 }

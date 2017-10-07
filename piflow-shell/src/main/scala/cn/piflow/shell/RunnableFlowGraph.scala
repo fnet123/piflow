@@ -3,15 +3,17 @@ package cn.piflow.shell
 import java.util.Date
 
 import cn.piflow._
-import cn.piflow.dsl.PipedProcessorNode
+import cn.piflow.dsl.BoundNode
 import cn.piflow.util.FormatUtils
+import cn.piflow.dsl._
 
 /**
   * @author bluejoe2008@gmail.com
   */
 
 class RunnableFlowGraph(flowGraph: FlowGraph)(implicit runner: Runner) {
-  def this(node: PipedProcessorNode)(implicit runner: Runner) = this(node.flowGraph)(runner);
+  def this(node: ChainWithTail[_])(implicit runner: Runner) =
+    this(chained2Graph(node))(runner);
 
   def !() {
     val time1 = +System.currentTimeMillis();

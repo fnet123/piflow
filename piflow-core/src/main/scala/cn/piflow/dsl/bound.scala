@@ -11,14 +11,14 @@ import scala.collection.mutable.ArrayBuffer
 /**
   * Created by bluejoe on 2017/10/1.
   */
-case class BoundEdge(target: BoundNode[_], ports: (String, String)) {
+case class Sibling(target: BoundNode[_], ports: (String, String)) {
 }
 
 abstract class BoundNode[T](val userData: T) {
   type NodeWithPortType <: Arrow[T];
   type RefType <: Ref[T];
-  val successors = ArrayBuffer[BoundEdge]();
-  val predecessors = ArrayBuffer[BoundEdge]();
+  val successors = ArrayBuffer[Sibling]();
+  val predecessors = ArrayBuffer[Sibling]();
   private val refs = ArrayBuffer[RefType]();
 
   def createProcessor(): Processor;
@@ -28,11 +28,11 @@ abstract class BoundNode[T](val userData: T) {
   }
 
   def addSuccessor(target: BoundNode[_], ports: (String, String)): Unit = {
-    successors += BoundEdge(target, ports);
+    successors += Sibling(target, ports);
   }
 
   def addPredecessor(target: BoundNode[_], ports: (String, String)): Unit = {
-    predecessors += BoundEdge(target, ports);
+    predecessors += Sibling(target, ports);
   }
 
   def createNodeWithPort(ports: (String, String)): NodeWithPortType;

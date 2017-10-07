@@ -71,7 +71,7 @@ abstract class ChainWithTail[Y](val current: Arrow[_], val successor: Arrow[Y])
 
     //create links
     involvedBounds.keys.foreach { bound: BoundNode[_] =>
-      bound.successors.foreach { edge: BoundEdge =>
+      bound.successors.foreach { edge: Sibling =>
         flowGraph.link(allNodes(bound), allNodes(edge.target), edge.ports)
       }
     }
@@ -83,11 +83,11 @@ abstract class ChainWithTail[Y](val current: Arrow[_], val successor: Arrow[Y])
     if (!involvedBounds.contains(bound)) {
       involvedBounds(bound) = new Object();
 
-      bound.predecessors.foreach { edge: BoundEdge =>
+      bound.predecessors.foreach { edge: Sibling =>
         visitBound(edge.target, involvedBounds);
       }
 
-      bound.successors.foreach { edge: BoundEdge =>
+      bound.successors.foreach { edge: Sibling =>
         visitBound(edge.target, involvedBounds);
       }
     }

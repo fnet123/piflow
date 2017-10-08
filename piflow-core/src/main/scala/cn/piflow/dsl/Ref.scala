@@ -1,6 +1,6 @@
 package cn.piflow.dsl
 
-import cn.piflow.ProcessorNode
+import cn.piflow.FlowNode
 import cn.piflow.io.{BatchSource, Sink}
 import cn.piflow.processor.Processor
 
@@ -11,11 +11,11 @@ trait Ref[T] {
   type BoundType <: BoundNode[T];
 
   private var _bound: BoundType = null.asInstanceOf[BoundType];
-  private var _node: ProcessorNode = null.asInstanceOf[ProcessorNode];
+  private var _node: FlowNode = null.asInstanceOf[FlowNode];
 
   def bind(bound: BoundType) = _bound = bound;
 
-  def bind(node: ProcessorNode) = _node = node;
+  def bind(node: FlowNode) = _node = node;
 
   def as[T]: T = get.asInstanceOf[T];
 
@@ -23,19 +23,19 @@ trait Ref[T] {
 
   def bound: BoundType = _bound;
 
-  def node: ProcessorNode = _node;
+  def node: FlowNode = _node;
 
   def processor: Processor = _node.processor;
 }
 
 case class SourceRef() extends Ref[BatchSource] {
-  override type BoundType = BoundSource;
+  override type BoundType = SourceNode;
 }
 
 case class SinkRef() extends Ref[Sink] {
-  override type BoundType = BoundSink;
+  override type BoundType = SinkNode;
 }
 
 case class ProcessorRef() extends Ref[Processor] {
-  override type BoundType = BoundProcessor;
+  override type BoundType = ProcessorNode;
 }

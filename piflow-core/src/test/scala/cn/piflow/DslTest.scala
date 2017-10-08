@@ -32,18 +32,25 @@ class DslTest {
   }
 
   @Test
-  def testFlowSequence() = {
+  def testFlowSequence() {
     val ref1 = SinkRef();
 
-    val line = SeqAsSource(1, 2, 3, 4) / "_1:_1" >
+    val line1 = SeqAsSource(1, 2, 3, 4) > "_1:_1" >
       DoMap[Int, Int](_ + 1) >
       MemorySink() % ref1;
 
-    line.show();
-    runner.run(line);
+    line1.show();
+    runner.run(line1);
     Assert.assertEquals(Seq(2, 3, 4, 5), ref1.as[MemorySink].as[Int]);
     Assert.assertEquals(ref1.as[MemorySink], ref1.get);
     Assert.assertEquals(classOf[DoWrite], ref1.processor.getClass);
+
+    val line2 = SeqAsSource(1, 2, 3, 4) >
+      DoMap[Int, Int](_ + 1) >
+      MemorySink();
+
+    line2.show();
+    runner.run(line2);
   }
 
   @Test
@@ -52,7 +59,7 @@ class DslTest {
     val ref2 = ProcessorRef();
     val ref3 = SinkRef();
 
-    val line = SeqAsSource(1, 2, 3, 4) % ref1 / "_1:_1" >
+    val line = SeqAsSource(1, 2, 3, 4) % ref1 > "_1:_1" >
       DoMap[Int, Int](_ + 1) % ref2 >
       MemorySink() % ref3;
 
@@ -75,7 +82,7 @@ class DslTest {
       DoFork[Int](_ % 2 == 0, _ % 2 == 1) % forkNode >
       MemorySink() % ref1;
 
-    forkNode / "_2:_1" > MemorySink() % ref2;
+    forkNode > "_2:_1" > MemorySink() % ref2;
 
     val runner = Runner.sparkRunner(spark);
     line.show();
@@ -95,7 +102,7 @@ class DslTest {
       MemorySink() % mem;
 
     val line2 = SeqAsSource("a", "b", "c", "d") >
-      DoMap[String, String](_.toUpperCase()) / "_1:_2" >
+      DoMap[String, String](_.toUpperCase()) > "_1:_2" >
       zipNode;
 
     val runner = Runner.sparkRunner(spark);
@@ -115,7 +122,7 @@ class DslTest {
     val line2 = SeqAsSource("a", "b", "c", "d") >
       DoMap[String, String](_.toUpperCase());
 
-    val line3 = Seq(line1 / "_1:_1", line2 / "_1:_2") >
+    val line3 = Seq(line1 > "_1:_1", line2 > "_1:_2") >
       DoZip[Int, String]() >
       MemorySink() % mem;
 
@@ -139,7 +146,7 @@ class DslTest {
 
     SeqAsSource("a", "b", "c", "d") >
       DoMap[String, String](_.toUpperCase()) >
-      (DoFilter[String](_.charAt(0) <= 'B') / "_1:_2") >
+      (DoFilter[String](_.charAt(0) <= 'B') > "_1:_2") >
       mergeNode;
 
     val runner = Runner.sparkRunner(spark);

@@ -9,6 +9,6 @@ package object shell {
 	}
 
 	implicit def toRunnable(node: ChainWithTail[_])(implicit runner: Runner) = {
-		new RunnableFlowGraph(chained2Graph(node));
+		new RunnableFlowGraph(asGraph(node));
 	}
 }

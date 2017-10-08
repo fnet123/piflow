@@ -8,24 +8,24 @@ import com.google.common.graph.{EndpointPair, MutableValueGraph, ValueGraphBuild
 
 import scala.collection.JavaConversions.asScalaSet
 
-class ProcessorNode(val id: Int, val processor: Processor) {
+class FlowNode(val id: Int, val processor: Processor) {
 }
 
 class FlowGraph {
   val graph: MutableValueGraph[Integer, (String, String)] =
     ValueGraphBuilder.directed().build();
-  val nodesMap = collection.mutable.Map[Integer, ProcessorNode]();
+  val nodesMap = collection.mutable.Map[Integer, FlowNode]();
   val nodeId = new AtomicInteger(0);
 
-  def createNode(processor: Processor): ProcessorNode = {
+  def createNode(processor: Processor): FlowNode = {
     val nid = nodeId.incrementAndGet();
     graph.addNode(nid);
-    val node = new ProcessorNode(nid, processor);
+    val node = new FlowNode(nid, processor);
     nodesMap(nid) = node;
     node;
   }
 
-  def link(thisNode: ProcessorNode, thatNode: ProcessorNode,
+  def link(thisNode: FlowNode, thatNode: FlowNode,
            portNamePair: (String, String) = ("_1", "_1")): FlowGraph = {
     graph.putEdgeValue(thisNode.id, thatNode.id, portNamePair);
     this;

@@ -13,7 +13,7 @@ import cn.piflow.dsl._
 
 class RunnableFlowGraph(flowGraph: FlowGraph)(implicit runner: Runner) {
   def this(node: ChainWithTail[_])(implicit runner: Runner) =
-    this(chained2Graph(node))(runner);
+    this(asGraph(node))(runner);
 
   def !() {
     val time1 = +System.currentTimeMillis();

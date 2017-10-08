@@ -1,4 +1,7 @@
-package cn.piflow.shell;
+package cn.piflow.shell
+
+;
+
 import org.junit.{Assert, Test}
 
 class ShellTest {

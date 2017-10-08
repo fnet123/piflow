@@ -8,11 +8,17 @@ import scala.collection.Seq
 
 class JobCmd(runner: Runner) extends Cmd {
 	def list = listJobInstances(None);
+
 	def list(jobId: String): Unit = listJobInstances(Some(jobId));
+
 	def list(jobId: Int): Unit = list("" + jobId);
+
 	def slist(): Unit = listScheduledJobs();
+
 	def hist(): Unit = listJobExecutions();
+
 	def hist(jobId: String): Unit = listJobExecutions(jobId);
+
 	def hist(jobId: Int): Unit = hist("" + jobId);
 
 	private def existingJobId(jm: JobManager, jobId: String): Option[String] = {

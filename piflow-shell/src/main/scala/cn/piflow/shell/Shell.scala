@@ -36,6 +36,7 @@ class Shell {
 			}
 
 			val promptMsg = properties("ShellPrompt");
+
 			override def prompt = promptMsg;
 		}
 

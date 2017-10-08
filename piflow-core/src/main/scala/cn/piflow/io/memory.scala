@@ -6,47 +6,47 @@ import org.apache.spark.sql.execution.streaming.{ConsoleSink => SparkConsoleSink
 import org.apache.spark.sql.streaming.OutputMode
 
 /**
-  * @author bluejoe2008@gmail.com
-  */
+	* @author bluejoe2008@gmail.com
+	*/
 case class MemorySink(outputMode: OutputMode = OutputMode.Append) extends BatchSink with StreamSink {
-  var optionSparkMemorySink: Option[SparkMemorySink] = None;
+	var optionSparkMemorySink: Option[SparkMemorySink] = None;
 
-  override def toString = this.getClass.getSimpleName;
+	override def toString = this.getClass.getSimpleName;
 
-  override def useTempCheckpointLocation(outputMode: OutputMode, ctx: RunnerContext): Boolean = true;
+	override def useTempCheckpointLocation(outputMode: OutputMode, ctx: RunnerContext): Boolean = true;
 
-  override def recoverFromCheckpointLocation(outputMode: OutputMode, ctx: RunnerContext): Boolean = {
-    ctx.isDefined("checkpointLocation") && outputMode == OutputMode.Complete()
-  }
+	override def recoverFromCheckpointLocation(outputMode: OutputMode, ctx: RunnerContext): Boolean = {
+		ctx.isDefined("checkpointLocation") && outputMode == OutputMode.Complete()
+	}
 
-  override def saveDataset(ds: Dataset[_], outputMode: OutputMode, ctx: RunnerContext) = {
-    addBatch(-1, ds.toDF(), outputMode, ctx);
-  }
+	override def saveDataset(ds: Dataset[_], outputMode: OutputMode, ctx: RunnerContext) = {
+		addBatch(-1, ds.toDF(), outputMode, ctx);
+	}
 
-  override def addBatch(batchId: Long, data: DataFrame, outputMode: OutputMode, ctx: RunnerContext): Unit = {
-    if (!optionSparkMemorySink.isDefined) {
-      val rows = data.head(1);
-      if (!rows.isEmpty) {
-        val row = rows(0);
-        optionSparkMemorySink = Some(new SparkMemorySink(row.schema, outputMode));
-      }
-    }
+	override def addBatch(batchId: Long, data: DataFrame, outputMode: OutputMode, ctx: RunnerContext): Unit = {
+		if (optionSparkMemorySink.isEmpty) {
+			val rows = data.head(1);
+			if (!rows.isEmpty) {
+				val row = rows(0);
+				optionSparkMemorySink = Some(new SparkMemorySink(row.schema, outputMode));
+			}
+		}
 
-    optionSparkMemorySink.foreach(_.addBatch(batchId, data));
-  }
+		optionSparkMemorySink.foreach(_.addBatch(batchId, data));
+	}
 
-  def as[T]: Seq[_] = asRow.map {
-    _.apply(0).asInstanceOf[T];
-  }
+	def as[T]: Seq[_] = asRow.map {
+		_.apply(0).asInstanceOf[T];
+	}
 
-  def asSeq: Seq[Seq[_]] = asRow.map {
-    _.toSeq;
-  }
+	def asSeq: Seq[Seq[_]] = asRow.map {
+		_.toSeq;
+	}
 
-  def asRow: Seq[Row] = {
-    if (optionSparkMemorySink.isDefined)
-      optionSparkMemorySink.get.allData;
-    else
-      Seq[Row]();
-  };
+	def asRow: Seq[Row] = {
+		if (optionSparkMemorySink.isDefined)
+			optionSparkMemorySink.get.allData;
+		else
+			Seq[Row]();
+	};
 }

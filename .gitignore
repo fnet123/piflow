@@ -1,3 +1,4 @@
+.idea
 .cache*
 *.class
 *.log
@@ -21,3 +22,12 @@ project/plugins/project/
 /.cache-main
 /.cache-tests
 /.settings/
+out/
+piflow-core/piflow-core.iml
+piflow-core/spark-warehouse/
+piflow-core/src/main/scala/cn/piflow/processor/ml/
+piflow-project.iml
+piflow-shell/piflow-shell.iml
+piflow-shell/spark-warehouse/
+piflow-webui/piflow-webui.iml
+spark-warehouse/

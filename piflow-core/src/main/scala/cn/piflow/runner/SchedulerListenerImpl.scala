@@ -4,56 +4,56 @@ import cn.piflow.Logging
 import org.quartz.{JobDetail, JobKey, SchedulerException, SchedulerListener, Trigger, TriggerKey}
 
 /**
-  * @author bluejoe2008@gmail.com
-  */
+	* @author bluejoe2008@gmail.com
+	*/
 class SchedulerListenerImpl(teg: TriggerExtraGroup) extends SchedulerListener with Logging {
-  def jobScheduled(trigger: Trigger) {
-    teg.getOrCreate(trigger.getKey);
-    logger.debug(String.format("job scheduled: %s", trigger.getKey.getName));
-  }
+	def jobScheduled(trigger: Trigger) {
+		teg.getOrCreate(trigger.getKey);
+		logger.debug(String.format("job scheduled: %s", trigger.getKey.getName));
+	}
 
-  def jobUnscheduled(triggerKey: TriggerKey) {
-    logger.debug(String.format("job unscheduled: %s", triggerKey.getName));
-  }
+	def jobUnscheduled(triggerKey: TriggerKey) {
+		logger.debug(String.format("job unscheduled: %s", triggerKey.getName));
+	}
 
-  def triggerFinalized(trigger: Trigger) {
-    teg.get(trigger.getKey).notifyTermination();
-    logger.debug(String.format("job finalized: %s", trigger.getKey.getName));
-    //do not logout: historic records
-    //teg.logout(trigger.getKey);
-  }
+	def triggerFinalized(trigger: Trigger) {
+		teg.get(trigger.getKey).notifyTermination();
+		logger.debug(String.format("job finalized: %s", trigger.getKey.getName));
+		//do not logout: historic records
+		//teg.logout(trigger.getKey);
+	}
 
-  def triggerPaused(triggerKey: TriggerKey) {}
+	def triggerPaused(triggerKey: TriggerKey) {}
 
-  def triggersPaused(triggerGroup: String) {}
+	def triggersPaused(triggerGroup: String) {}
 
-  def triggerResumed(triggerKey: TriggerKey) {}
+	def triggerResumed(triggerKey: TriggerKey) {}
 
-  def triggersResumed(triggerGroup: String) {}
+	def triggersResumed(triggerGroup: String) {}
 
-  def jobAdded(jobDetail: JobDetail) {}
+	def jobAdded(jobDetail: JobDetail) {}
 
-  def jobDeleted(jobKey: JobKey) {}
+	def jobDeleted(jobKey: JobKey) {}
 
-  def jobPaused(jobKey: JobKey) {}
+	def jobPaused(jobKey: JobKey) {}
 
-  def jobsPaused(jobGroup: String) {}
+	def jobsPaused(jobGroup: String) {}
 
-  def jobResumed(jobKey: JobKey) {}
+	def jobResumed(jobKey: JobKey) {}
 
-  def jobsResumed(jobGroup: String) {}
+	def jobsResumed(jobGroup: String) {}
 
-  def schedulerError(msg: String, cause: SchedulerException) {}
+	def schedulerError(msg: String, cause: SchedulerException) {}
 
-  def schedulerInStandbyMode() {}
+	def schedulerInStandbyMode() {}
 
-  def schedulerStarted() {}
+	def schedulerStarted() {}
 
-  def schedulerStarting() {}
+	def schedulerStarting() {}
 
-  def schedulerShutdown() {}
+	def schedulerShutdown() {}
 
-  def schedulerShuttingdown() {}
+	def schedulerShuttingdown() {}
 
-  def schedulingDataCleared() {}
+	def schedulingDataCleared() {}
 }

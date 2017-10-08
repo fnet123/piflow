@@ -3,7 +3,9 @@ package cn.piflow.shell
 import org.apache.commons.io.IOUtils
 
 trait Cmd {
-	val helpInfo = IOUtils.toString(this.getClass.getResource("/help-info/" + this.getClass.getSimpleName + ".txt").openStream());
+	lazy val helpInfo = IOUtils.toString(this.getClass.getResource("/help-info/" +
+		this.getClass.getSimpleName + ".txt").openStream());
+
 	def help() = {
 		println(helpInfo);
 	}

@@ -9,24 +9,24 @@ import cn.piflow.shell._
 import org.apache.spark.sql._
 
 object PRELOAD_CODES {
-  implicit val spark = SparkSession.builder.master("local[4]")
-    .getOrCreate();
+	implicit val spark = SparkSession.builder.master("local[4]")
+		.getOrCreate();
 
-  spark.conf.set("spark.sql.streaming.checkpointLocation", "/tmp/");
+	spark.conf.set("spark.sql.streaming.checkpointLocation", "/tmp/");
 
-  import spark.implicits._;
+	import spark.implicits._;
 
-  implicit val runner = Runner.sparkRunner(spark);
-  val jobs = new cn.piflow.shell.cmd.JobCmd(runner);
-  val store = new cn.piflow.shell.cmd.StoreCmd(runner);
+	implicit val runner = Runner.sparkRunner(spark);
+	val jobs = new cn.piflow.shell.cmd.JobCmd(runner);
+	val store = new cn.piflow.shell.cmd.StoreCmd(runner);
 
-  private def TEST_IMPORTS_WILL_NEVER_USED() {
-    if (false) {
-      new Date();
-      val pl = SeqAsSource(1, 2, 3, 4) > DoMap[Int, Int](_ + 1) > DoSleep(30000) > ConsoleSink();
-      node2Graph(pl);
-      pl !;
-      pl !@(Start.now)
-    }
-  }
+	private def TEST_IMPORTS_WILL_NEVER_USED() {
+		if (false) {
+			new Date();
+			val pl = SeqAsSource(1, 2, 3, 4) > DoMap[Int, Int](_ + 1) > DoSleep(30000) > ConsoleSink();
+			asGraph(pl);
+			pl !;
+			pl !@ (Start.now)
+		}
+	}
 }

@@ -1,9 +1,10 @@
-package cn.piflow
+package cn.piflow.flow
 
 ;
 
 import java.util.Date
 
+import cn.piflow._
 import cn.piflow.io.{ConsoleSink, SeqAsSource}
 import cn.piflow.processor.Processor020
 import cn.piflow.processor.ds.DoMap

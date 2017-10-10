@@ -1,14 +1,13 @@
 package cn.piflow.runner
 
-import cn.piflow.processor.ProcessorN2N
+import cn.piflow.processor.{Processor, ProcessorN2N}
 import cn.piflow.{FlowException, FlowGraph, Logging, RunnerContext}
 import org.apache.spark.sql.SparkSession
 
 import scala.collection.JavaConversions.asScalaSet
 
-class JobExecutionException(currentNodeId: Integer, predecessorNodeId: Integer, ports: (String, String), cause: Throwable)
-	extends FlowException(s"fail to execute job, currentNodeId=$currentNodeId, predecessorNodeId=$predecessorNodeId, ports=$ports",
-		cause) {
+class JobExecutionException(nodeId: Integer, proccesor: Processor, cause: Throwable)
+	extends FlowException(s"fail to execute job, nodeId=$nodeId, processor=$proccesor", cause) {
 
 }
 
@@ -51,23 +50,24 @@ object JobExecutor extends Logging {
 			val predecessorNodeIds = flow.graph.predecessors(nodeId);
 			for (predecessorNodeId ← predecessorNodeIds) {
 				val edgeValue = flow.graph.edgeValue(predecessorNodeId, nodeId).get;
-				try {
-					val outputs = visitNode(flow, predecessorNodeId, visitedNodes, ctx);
-					if (edgeValue._1 != null && edgeValue._2 != null) {
-						inputs += (edgeValue._2 -> outputs(edgeValue._1));
-					}
-				}
-				catch {
-					case e: Throwable => throw new JobExecutionException(nodeId, predecessorNodeId, edgeValue, e);
+				val outputs = visitNode(flow, predecessorNodeId, visitedNodes, ctx);
+				if (edgeValue._1 != null && edgeValue._2 != null) {
+					inputs += (edgeValue._2 -> outputs(edgeValue._1));
 				}
 			}
 
 			val processor = thisNode.processor;
 			logger.debug(s"visiting node: $processor, node id: $nodeId");
-			val outputs = ProcessorN2N.fromUnknown(processor).performN2N(inputs.toMap, ctx);
-			logger.debug(s"visited node: $processor, node id: $nodeId");
-			visitedNodes(nodeId) = outputs;
-			outputs;
+
+			try {
+				val outputs = ProcessorN2N.fromUnknown(processor).performN2N(inputs.toMap, ctx);
+				logger.debug(s"visited node: $processor, node id: $nodeId");
+				visitedNodes(nodeId) = outputs;
+				outputs;
+			}
+			catch {
+				case e: Throwable => throw new JobExecutionException(nodeId, processor, e);
+			}
 		}
 	}
 }

@@ -8,13 +8,13 @@ object ReflectUtils {
 }
 
 class ReflectedObject(o: Any) {
-	def doGet(name: String): AnyRef = {
+	def _get(name: String): AnyRef = {
 		val field = o.getClass.getDeclaredField(name);
 		field.setAccessible(true);
 		field.get(o);
 	}
 
-	def doCall(name: String)(args: Any*) = {
+	def _call(name: String)(args: Any*) = {
 		val method = o.getClass.getDeclaredMethod(name);
 		method.setAccessible(true);
 		method.invoke(o, args);

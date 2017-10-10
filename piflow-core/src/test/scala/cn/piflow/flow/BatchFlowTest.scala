@@ -1,12 +1,14 @@
-package cn.piflow
+package cn.piflow.flow
 
 import java.io.{File, FileWriter}
 
-import cn.piflow.io.{MemorySink, SeqAsSource}
+import cn.piflow.io.{FileSource, MemorySink, SeqAsSource}
 import cn.piflow.processor.ds.{DoFilter, DoFork, DoMap, DoMerge, DoZip}
 import cn.piflow.processor.io.{DoLoad, DoWrite}
+import cn.piflow.{FlowGraph, Runner}
 import org.apache.spark.sql.SparkSession
 import org.junit.{Assert, Test}
+import org.junit.AfterClass
 
 class BatchFlowTest {
 	val cronExpr = "*/5 * * * * ";
@@ -39,7 +41,7 @@ class BatchFlowTest {
 		fw.write("hello\r\nworld");
 		fw.close();
 
-		val node1 = fg.createNode(DoLoad("text", Map("path" -> "./abc.txt")));
+		val node1 = fg.createNode(DoLoad(FileSource("text", "./abc.txt")));
 		val mem = MemorySink();
 		val node2 = fg.createNode(DoWrite(mem));
 		fg.link(node1, node2, ("_1", "_1"));

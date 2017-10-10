@@ -8,32 +8,43 @@ import org.apache.spark.sql.streaming.OutputMode
 /**
 	* @author bluejoe2008@gmail.com
 	*/
-case class MemorySink(outputMode: OutputMode = OutputMode.Append) extends BatchSink with StreamSink {
-	var optionSparkMemorySink: Option[SparkMemorySink] = None;
+case class MemorySink() extends BatchSink with StreamSink {
+	var _sparkMemorySink: SparkMemorySink = null;
+	var _recoverFromCheckpointLocation: Boolean = false;
+	var _outputMode: OutputMode = null;
 
-	override def toString = this.getClass.getSimpleName;
+	override def destroy(): Unit = {
 
-	override def useTempCheckpointLocation(outputMode: OutputMode, ctx: RunnerContext): Boolean = true;
-
-	override def recoverFromCheckpointLocation(outputMode: OutputMode, ctx: RunnerContext): Boolean = {
-		ctx.isDefined("checkpointLocation") && outputMode == OutputMode.Complete()
 	}
 
-	override def saveDataset(ds: Dataset[_], outputMode: OutputMode, ctx: RunnerContext) = {
-		addBatch(-1, ds.toDF(), outputMode, ctx);
+	override def saveBatch(ds: Dataset[_]) = {
+		addBatch(-1, ds.toDF());
 	}
 
-	override def addBatch(batchId: Long, data: DataFrame, outputMode: OutputMode, ctx: RunnerContext): Unit = {
-		if (optionSparkMemorySink.isEmpty) {
+	override def addBatch(batchId: Long, data: DataFrame): Unit = {
+		if (_sparkMemorySink == null) {
 			val rows = data.head(1);
 			if (!rows.isEmpty) {
 				val row = rows(0);
-				optionSparkMemorySink = Some(new SparkMemorySink(row.schema, outputMode));
+				_sparkMemorySink = new SparkMemorySink(row.schema, _outputMode);
 			}
 		}
 
-		optionSparkMemorySink.foreach(_.addBatch(batchId, data));
+		_sparkMemorySink.addBatch(batchId, data);
 	}
+
+	override def init(outputMode: OutputMode, ctx: RunnerContext) = {
+		_outputMode = outputMode;
+		_recoverFromCheckpointLocation = ctx.isDefined("checkpointLocation") &&
+			outputMode == OutputMode.Complete();
+	}
+
+	override def toString = this.getClass.getSimpleName;
+
+	override def useTempCheckpointLocation(): Boolean = true;
+
+	override def recoverFromCheckpointLocation(): Boolean = _recoverFromCheckpointLocation;
+
 
 	def as[T]: Seq[_] = asRow.map {
 		_.apply(0).asInstanceOf[T];
@@ -44,8 +55,8 @@ case class MemorySink(outputMode: OutputMode = OutputMode.Append) extends BatchS
 	}
 
 	def asRow: Seq[Row] = {
-		if (optionSparkMemorySink.isDefined)
-			optionSparkMemorySink.get.allData;
+		if (_sparkMemorySink != null)
+			_sparkMemorySink.allData;
 		else
 			Seq[Row]();
 	};

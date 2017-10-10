@@ -8,21 +8,25 @@ import org.apache.spark.sql.streaming.OutputMode
 /**
 	* @author bluejoe2008@gmail.com
 	*/
-case class ConsoleSink() extends BatchSink with StreamSink {
-	val scsMap = Map[String, String]();
-	val scs = new SparkConsoleSink(scsMap);
+case class ConsoleSink() extends SparkStreamSinkAdapter
+	with BatchSink with StreamSink {
+	override def destroy(): Unit = {
+
+	}
+
+	def createSparkStreamSink(outputMode: OutputMode, ctx: RunnerContext) = new SparkConsoleSink(Map[String, String]());
 
 	override def toString = this.getClass.getSimpleName;
 
-	def saveDataset(ds: Dataset[_], outputMode: OutputMode, ctx: RunnerContext) = {
+	override def init(outputMode: OutputMode, ctx: RunnerContext): Unit = {
+
+	}
+
+	def saveBatch(ds: Dataset[_]) = {
 		ds.show();
 	}
 
-	def addBatch(batchId: Long, data: DataFrame, outputMode: OutputMode, ctx: RunnerContext): Unit = {
-		scs.addBatch(batchId, data);
-	}
+	override def useTempCheckpointLocation(): Boolean = true;
 
-	override def useTempCheckpointLocation(outputMode: OutputMode, ctx: RunnerContext): Boolean = true;
-
-	override def recoverFromCheckpointLocation(outputMode: OutputMode, ctx: RunnerContext): Boolean = false;
+	override def recoverFromCheckpointLocation(): Boolean = false;
 }

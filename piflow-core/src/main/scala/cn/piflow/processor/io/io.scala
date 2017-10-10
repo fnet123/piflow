@@ -3,54 +3,53 @@ package cn.piflow.processor.io
 import java.util.concurrent.atomic.AtomicInteger
 
 import cn.piflow.RunnerContext
-import cn.piflow.io.{BatchSink, BatchSource, Sink, StreamSink}
+import cn.piflow.io._
 import cn.piflow.processor.{Processor021, Processor120}
 import cn.piflow.util.ReflectUtils._
 import org.apache.spark.sql._
-import org.apache.spark.sql.execution.streaming.{Sink => SparkStreamSink}
+import org.apache.spark.sql.execution.streaming.{Sink => SparkStreamSink, Source => SparkStreamSource, _}
 import org.apache.spark.sql.streaming.{OutputMode, ProcessingTime, StreamingQuery}
+import org.apache.spark.sql.types.StructType
 
 /**
 	* @author bluejoe2008@gmail.com
 	*/
-object DoLoad {
-	def apply(format: String, args: Map[String, String] = Map()) = {
-		new _DoLoadDefinedSource(format, args);
-	}
-
-	def apply(source: BatchSource) = {
-		new _DoLoadSource(source);
-	}
-}
-
-case class _DoLoadSource(source: BatchSource) extends Processor021 {
+case class DoLoad(source: Source, outputMode: OutputMode = OutputMode.Complete)
+	extends Processor021 {
 	override def perform(ctx: RunnerContext): Dataset[_] = {
-		source.createDataset(ctx);
+		source match {
+			case bs: BatchSource => loadBatch(bs, ctx);
+			case ss: StreamSource => loadStream(ss, ctx);
+		}
 	}
-}
 
-case class _DoLoadDefinedSource(format: String, args: Map[String, String]) extends Processor021 {
-	override def perform(ctx: RunnerContext): Dataset[_] = {
-		ctx.forType[SparkSession].read.format(format).options(args).load();
+	def loadBatch(bs: BatchSource, ctx: RunnerContext): Dataset[_] = {
+		bs.init(ctx);
+		bs.loadDataset();
 	}
-}
 
-case class DoLoadStream(format: String, args: Map[String, String]) extends Processor021 {
-	override def perform(ctx: RunnerContext): Dataset[_] = {
-		val df = ctx.forType[SparkSession].readStream.format(format).options(args).load();
-		df;
+	def loadStream(ss: StreamSource, ctx: RunnerContext): Dataset[_] = {
+		//TODO: hard code here
+		ctx.forType[SparkSession].readStream.load();
 	}
-}
 
-/*
-case class DoLoadStream2(source: StreamSource) extends Processor021 {
-	override def perform(ctx: RunnerContext): Dataset[_] = {
-		Dataset.ofRows(sparkSession, StreamingRelation(dataSource));
-		val df = ctx.forType[SparkSession].readStream.format(format).options(args).load();
-		df;
+	def asSparkStreamSource(ss: StreamSource, ctx: RunnerContext) = new SparkStreamSource() {
+		override def schema: StructType = null;
+
+
+		override def getOffset: Option[Offset] = {
+			SparkIOSupport.toOffsetOption(ss.getOffset);
+		}
+
+		override def getBatch(start: Option[Offset], end: Offset): DataFrame = {
+			ss.loadBatch(SparkIOSupport.valueOf(start), SparkIOSupport.valueOf(end)).toDF();
+		}
+
+		override def commit(end: Offset): Unit = {}
+
+		override def stop(): Unit = {}
 	}
 }
-*/
 
 case class DoWrite(sink: Sink, outputMode: OutputMode = OutputMode.Complete)
 	extends Processor120 {
@@ -64,16 +63,17 @@ case class DoWrite(sink: Sink, outputMode: OutputMode = OutputMode.Complete)
 
 	def performStream(ss: StreamSink, ds: Dataset[_], ctx: RunnerContext) {
 		val df = ds.toDF();
-		val query = df.sparkSession.doGet("sessionState").
-			doGet("streamingQueryManager").
-			doCall("startQuery")(
+		ss.init(outputMode, ctx);
+		val query = df.sparkSession._get("sessionState").
+			_get("streamingQueryManager").
+			_call("startQuery")(
 				DoWrite.getNextQueryId,
 				ctx("checkpointLocation").asInstanceOf[String],
 				df,
 				asSparkStreamSink(ss, ctx),
 				outputMode,
-				ss.useTempCheckpointLocation(outputMode, ctx),
-				ss.recoverFromCheckpointLocation(outputMode, ctx),
+				ss.useTempCheckpointLocation,
+				ss.recoverFromCheckpointLocation,
 				ProcessingTime(0) //start now
 			).asInstanceOf[StreamingQuery];
 
@@ -82,12 +82,13 @@ case class DoWrite(sink: Sink, outputMode: OutputMode = OutputMode.Complete)
 
 	def asSparkStreamSink(ss: StreamSink, ctx: RunnerContext) = new SparkStreamSink() {
 		def addBatch(batchId: Long, data: DataFrame): Unit = {
-			ss.addBatch(batchId, data, outputMode, ctx);
+			ss.addBatch(batchId, data);
 		}
 	}
 
 	def performBatch(bs: BatchSink, ds: Dataset[_], ctx: RunnerContext): Unit = {
-		bs.saveDataset(ds, outputMode, ctx);
+		bs.init(outputMode, ctx);
+		bs.saveBatch(ds);
 	}
 }
 

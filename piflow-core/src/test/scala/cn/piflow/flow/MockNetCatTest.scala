@@ -1,4 +1,4 @@
-package cn.piflow
+package cn.piflow.flow
 
 import cn.piflow.util.MockNetCat
 import org.apache.spark.sql.SparkSession

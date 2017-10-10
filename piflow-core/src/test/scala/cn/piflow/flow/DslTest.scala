@@ -1,10 +1,11 @@
-package cn.piflow
+package cn.piflow.flow
 
+import cn.piflow.Runner
 import cn.piflow.dsl._
 import cn.piflow.io.{MemorySink, SeqAsSource}
 import cn.piflow.processor.DoSleep
 import cn.piflow.processor.ds._
-import cn.piflow.processor.io.{DoWrite, _DoLoadSource}
+import cn.piflow.processor.io.{DoWrite, DoLoad}
 import org.apache.spark.sql.SparkSession
 import org.junit.{Assert, Test}
 
@@ -67,7 +68,7 @@ class DslTest {
 		Assert.assertEquals(SeqAsSource(1, 2, 3, 4), ref1.get);
 		Assert.assertEquals(Seq(2, 3, 4, 5), ref3.as[MemorySink].as[Int]);
 		Assert.assertEquals(ref3.as[MemorySink], ref3.as[MemorySink]);
-		Assert.assertEquals(classOf[_DoLoadSource], ref1.processor.getClass);
+		Assert.assertEquals(classOf[DoLoad], ref1.processor.getClass);
 		Assert.assertEquals(classOf[DoMap[Int, Int]], ref2.processor.getClass);
 		Assert.assertEquals(classOf[DoWrite], ref3.processor.getClass);
 	}

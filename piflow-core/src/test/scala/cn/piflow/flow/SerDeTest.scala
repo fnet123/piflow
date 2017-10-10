@@ -1,9 +1,10 @@
-package cn.piflow
+package cn.piflow.flow
 
 ;
 
 import java.nio.ByteBuffer
 
+import cn.piflow.FlowGraph
 import cn.piflow.io.{MemorySink, SeqAsSource}
 import cn.piflow.processor.ds.DoMap
 import cn.piflow.processor.io.{DoLoad, DoWrite}

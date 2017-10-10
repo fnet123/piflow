@@ -31,3 +31,5 @@ piflow-shell/piflow-shell.iml
 piflow-shell/spark-warehouse/
 piflow-webui/piflow-webui.iml
 spark-warehouse/
+/piflow-core/.idea/
+/.idea/

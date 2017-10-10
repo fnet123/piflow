@@ -9,8 +9,15 @@ import org.apache.spark.sql.{Dataset, Encoder, SparkSession}
 
 case class SeqAsSource[X: Encoder](t: X*) extends BatchSource {
 	override def toString = this.getClass.getSimpleName;
+	var _spark: SparkSession = null;
 
-	def createDataset(ctx: RunnerContext): Dataset[X] = {
-		ctx.forType[SparkSession].createDataset(t);
+	def init(ctx: RunnerContext): Unit = {
+		_spark = ctx.forType[SparkSession];
+	}
+
+	def destroy() {}
+
+	def loadDataset(): Dataset[X] = {
+		_spark.createDataset(t);
 	}
 }

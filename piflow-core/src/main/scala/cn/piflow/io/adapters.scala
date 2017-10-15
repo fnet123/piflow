@@ -20,7 +20,7 @@ abstract class SparkSinkAdapter extends BatchSink {
 		_outputMode = outputMode;
 	}
 
-	def saveBatch(ds: Dataset[_]): Unit = {
+	def writeBatch(ds: Dataset[_]): Unit = {
 		val writer = ds.write.mode(SparkIOSupport.outputMode2SaveMode(_outputMode));
 		build(writer).save();
 	}
@@ -39,7 +39,7 @@ abstract class SparkSourceAdapter extends BatchSource {
 		_spark = ctx.forType[SparkSession];
 	}
 
-	def loadDataset(): Dataset[_] = {
+	def loadBatch(): Dataset[_] = {
 		val reader = _spark.read;
 		build(reader).load();
 	}
@@ -57,8 +57,8 @@ abstract class SparkStreamSinkAdapter extends StreamSink {
 		_sparkStreamSink = createSparkStreamSink(outputMode, ctx);
 	}
 
-	override def addBatch(batchId: Long, data: DataFrame) {
-		_sparkStreamSink.addBatch(batchId, data);
+	override def writeBatch(batchId: Long, data: Dataset[_]) {
+		_sparkStreamSink.addBatch(batchId, data.toDF());
 	}
 
 	override def destroy(): Unit = {

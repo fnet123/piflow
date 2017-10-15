@@ -17,7 +17,7 @@ case class SeqAsSource[X: Encoder](t: X*) extends BatchSource {
 
 	override def destroy() {}
 
-	def loadDataset(): Dataset[X] = {
+	def loadBatch(): Dataset[X] = {
 		_spark.createDataset(t);
 	}
 }

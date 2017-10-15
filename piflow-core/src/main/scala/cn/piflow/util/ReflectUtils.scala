@@ -1,8 +1,5 @@
 package cn.piflow.util
 
-import org.apache.commons.beanutils.BeanUtils
-import org.apache.commons.lang3.ClassUtils
-
 /**
 	* Created by bluejoe on 2017/9/30.
 	*/
@@ -15,11 +12,16 @@ object ReflectUtils {
 		field.get();
 	}
 
-	//TODO: never used
-	private def instanceOf[T](args: Any*)(implicit m: Manifest[T]): T = {
+	def instanceOf[T](args: Any*)(implicit m: Manifest[T]): T = {
 		val constructor = m.runtimeClass.getDeclaredConstructor(args.map(_.getClass): _*);
 		constructor.setAccessible(true);
-		constructor.newInstance(args).asInstanceOf[T];
+		constructor.newInstance(args.map(_.asInstanceOf[Object]): _*).asInstanceOf[T];
+	}
+
+	def instanceOf(className: String)(args: Any*) = {
+		val constructor = Class.forName(className).getDeclaredConstructor(args.map(_.getClass): _*);
+		constructor.setAccessible(true);
+		constructor.newInstance(args.map(_.asInstanceOf[Object]): _*);
 	}
 }
 

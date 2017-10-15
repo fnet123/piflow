@@ -9,11 +9,11 @@ import org.apache.spark.sql.execution.streaming.http.{HttpStreamSink => SparkHtt
 /**
 	* Created by bluejoe on 2017/10/14.
 	*/
-class HttpStreamSource(httpServletUrl: String,
-                       topic: String,
-                       msPollingPeriod: Int = 10,
-                       includesTimestamp: Boolean = false,
-                       timestampColumnName: String = "_TIMESTAMP_")
+case class HttpStreamSource(httpServletUrl: String,
+                            topic: String,
+                            msPollingPeriod: Int = 10,
+                            includesTimestamp: Boolean = false,
+                            timestampColumnName: String = "_TIMESTAMP_")
 	extends SparkStreamSourceAdapter with StreamSource {
 	def createSparkStreamSource(ctx: RunnerContext): SparkHttpStreamSource =
 		new SparkHttpStreamSource(ctx.forType[SQLContext],

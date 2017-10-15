@@ -12,13 +12,9 @@ trait Sink {
 }
 
 trait BatchSink extends Sink {
-	def saveBatch(ds: Dataset[_]): Unit;
+	def writeBatch(ds: Dataset[_]): Unit;
 }
 
 trait StreamSink extends Sink {
-	def addBatch(batchId: Long, data: DataFrame): Unit;
-
-	def useTempCheckpointLocation: Boolean = false;
-
-	def recoverFromCheckpointLocation: Boolean = true;
+	def writeBatch(batchId: Long, data: Dataset[_]): Unit;
 }

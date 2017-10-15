@@ -12,11 +12,12 @@ import org.apache.spark.sql.execution.datasources.DataSource
 import org.apache.spark.sql.execution.streaming.{Sink => SparkStreamSink, Source => SparkStreamSource, _}
 import org.apache.spark.sql.streaming._
 import org.apache.spark.sql.types.{StructField, StructType}
+import org.apache.spark.util.SystemClock
 
 /**
 	* @author bluejoe2008@gmail.com
 	*/
-case class DoLoad(source: Source, outputMode: OutputMode = OutputMode.Complete)
+case class DoLoad(source: Source)
 	extends Processor021 {
 	override def perform(ctx: RunnerContext): Dataset[_] = {
 		source match {
@@ -27,7 +28,7 @@ case class DoLoad(source: Source, outputMode: OutputMode = OutputMode.Complete)
 
 	def loadBatch(bs: BatchSource, ctx: RunnerContext): Dataset[_] = {
 		bs.init(ctx);
-		bs.loadDataset();
+		bs.loadBatch();
 	}
 
 	//TODO: bad code here
@@ -69,6 +70,7 @@ case class DoWrite(sink: Sink, outputMode: OutputMode = OutputMode.Complete)
 	extends Processor120 {
 	override def perform(input: Any, ctx: RunnerContext) {
 		val ds: Dataset[_] = input.asInstanceOf[Dataset[_]];
+		//stream comes from a StreamSource
 		if (ds.isStreaming)
 			saveStream(sink.asInstanceOf[StreamSink], ds, ctx);
 		else
@@ -84,14 +86,15 @@ case class DoWrite(sink: Sink, outputMode: OutputMode = OutputMode.Complete)
 			_getLazy[StreamingQueryManager]("streamingQueryManager");
 
 		val query = sqm._call[StreamingQuery]("startQuery")(
-			Utils.getNextQueryId,
-			ctx("checkpointLocation").asInstanceOf[String],
+			None, //Utils.getNextQueryId,
+			None, //ctx("checkpointLocation").asInstanceOf[String],
 			df,
 			asSparkStreamSink(ss, ctx),
 			outputMode,
-			ss.useTempCheckpointLocation,
-			ss.recoverFromCheckpointLocation,
-			ProcessingTime(0) //start now
+			false, //ss.useTempCheckpointLocation,
+			true, //ss.recoverFromCheckpointLocation,
+			ProcessingTime(0), //start now
+			instanceOf("org.apache.spark.util.SystemClock")()
 		);
 
 		query.awaitTermination();
@@ -99,13 +102,13 @@ case class DoWrite(sink: Sink, outputMode: OutputMode = OutputMode.Complete)
 
 	private def asSparkStreamSink(ss: StreamSink, ctx: RunnerContext) = new SparkStreamSink() {
 		def addBatch(batchId: Long, data: DataFrame): Unit = {
-			ss.addBatch(batchId, data);
+			ss.writeBatch(batchId, data);
 		}
 	}
 
 	def saveBatch(bs: BatchSink, ds: Dataset[_], ctx: RunnerContext): Unit = {
 		bs.init(outputMode, ctx);
-		bs.saveBatch(ds);
+		bs.writeBatch(ds);
 	}
 }
 
@@ -115,5 +118,6 @@ private object Utils {
 
 	def getNextStreamSourceName() = "stream-source-" + sourceId.incrementAndGet();
 
+	//TODO: actually not used
 	def getNextQueryId() = "query-" + queryId.incrementAndGet();
 }

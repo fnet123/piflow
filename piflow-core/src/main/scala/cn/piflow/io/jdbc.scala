@@ -22,7 +22,7 @@ class JdbcTableSink(parameters: Map[String, String]) extends BatchSink {
 		_outputMode = outputMode;
 	}
 
-	def saveBatch(ds: Dataset[_]): Unit = {
+	def writeBatch(ds: Dataset[_]): Unit = {
 		val sparkRelationProvider = new JdbcRelationProvider();
 		sparkRelationProvider.createRelation(_sqlContext,
 			SparkIOSupport.outputMode2SaveMode(_outputMode),

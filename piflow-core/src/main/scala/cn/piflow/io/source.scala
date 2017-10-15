@@ -11,7 +11,7 @@ trait Source {
 }
 
 trait BatchSource extends Source {
-	def loadDataset(): Dataset[_];
+	def loadBatch(): Dataset[_];
 }
 
 trait StreamSource extends Source {

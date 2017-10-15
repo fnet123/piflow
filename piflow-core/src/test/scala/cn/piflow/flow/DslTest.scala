@@ -109,7 +109,8 @@ class DslTest {
 		val runner = Runner.sparkRunner(spark);
 		line1.show();
 		runner.run(line1);
-		Assert.assertEquals(Seq(Seq(11, "A"), Seq(12, "B"), Seq(13, "C"), Seq(14, "D")), mem.as[MemorySink].asSeq);
+		Assert.assertEquals(Seq(Seq(11, "A"), Seq(12, "B"), Seq(13, "C"), Seq(14, "D")),
+			mem.as[MemorySink].asSeqs);
 	}
 
 	@Test
@@ -131,7 +132,7 @@ class DslTest {
 		line3.show();
 		runner.run(line3);
 		Assert.assertEquals(Seq(Seq(11, "A"), Seq(12, "B"), Seq(13, "C"), Seq(14, "D")),
-			mem.as[MemorySink].asSeq);
+			mem.as[MemorySink].asSeqs);
 	}
 
 	@Test

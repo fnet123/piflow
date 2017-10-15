@@ -37,12 +37,12 @@ object JobExecutor extends Logging {
 		new MapAsRunnerContext(scala.collection.mutable.Map[String, Any](
 			classOf[SparkSession].getName -> spark,
 			classOf[SQLContext].getName -> spark.sqlContext,
-			"checkpointLocation"->"/tmp/checkpoint-location/"
+			"checkpointLocation" -> spark.conf.get("spark.sql.streaming.checkpointLocation")
 		));
 
 	private def visitNode(flow: FlowGraph, nodeId: Integer,
-												visitedNodes: scala.collection.mutable.Map[Integer, Map[String, _]],
-												ctx: RunnerContext): Map[String, _] = {
+	                      visitedNodes: scala.collection.mutable.Map[Integer, Map[String, _]],
+	                      ctx: RunnerContext): Map[String, _] = {
 		if (visitedNodes.contains(nodeId)) {
 			visitedNodes(nodeId);
 		}

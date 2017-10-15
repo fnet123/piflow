@@ -13,7 +13,13 @@
     <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jetty.version>9.0.0.M0</jetty.version>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>com.github.bluejoe2008</groupId>
+            <artifactId>spark-http-stream</artifactId>
+            <version>0.9</version>
+        </dependency>
     </dependencies>
 </project>

@@ -2,7 +2,7 @@ package cn.piflow.runner
 
 import cn.piflow.processor.{Processor, ProcessorN2N}
 import cn.piflow.{FlowException, FlowGraph, Logging, RunnerContext}
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{SQLContext, SparkSession}
 
 import scala.collection.JavaConversions.asScalaSet
 
@@ -34,7 +34,11 @@ object JobExecutor extends Logging {
 	}
 
 	private def createRunnerContext(): RunnerContext =
-		new MapAsRunnerContext(scala.collection.mutable.Map[String, Any](classOf[SparkSession].getName -> spark));
+		new MapAsRunnerContext(scala.collection.mutable.Map[String, Any](
+			classOf[SparkSession].getName -> spark,
+			classOf[SQLContext].getName -> spark.sqlContext,
+			"checkpointLocation"->"/tmp/checkpoint-location/"
+		));
 
 	private def visitNode(flow: FlowGraph, nodeId: Integer,
 												visitedNodes: scala.collection.mutable.Map[Integer, Map[String, _]],

@@ -6,10 +6,12 @@ import cn.piflow.RunnerContext
 import cn.piflow.io._
 import cn.piflow.processor.{Processor021, Processor120}
 import cn.piflow.util.ReflectUtils._
+import com.sun.deploy.util.SessionState
 import org.apache.spark.sql._
+import org.apache.spark.sql.execution.datasources.DataSource
 import org.apache.spark.sql.execution.streaming.{Sink => SparkStreamSink, Source => SparkStreamSource, _}
-import org.apache.spark.sql.streaming.{OutputMode, ProcessingTime, StreamingQuery}
-import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.streaming._
+import org.apache.spark.sql.types.{StructField, StructType}
 
 /**
 	* @author bluejoe2008@gmail.com
@@ -28,12 +30,24 @@ case class DoLoad(source: Source, outputMode: OutputMode = OutputMode.Complete)
 		bs.loadDataset();
 	}
 
+	//TODO: bad code here
 	def loadStream(ss: StreamSource, ctx: RunnerContext): Dataset[_] = {
-		//TODO: hard code here
-		ctx.forType[SparkSession].readStream.load();
+		ss.init(ctx);
+		// Dataset.ofRows(sparkSession, StreamingRelation(dataSource))
+		val sparkSession = ctx.forType[SparkSession];
+
+		class SparkDataSource extends DataSource(sparkSession, "NeverUsedProviderClassName") {
+			override def createSource(metadataPath: String) = asSparkStreamSource(ss, ctx);
+			override lazy val sourceInfo = SourceInfo(Utils.getNextStreamSourceName(), ss.schema, Nil)
+		}
+
+		val dataSource = new SparkDataSource();
+		val schema = StructType(Seq[StructField]());
+		val sr = StreamingRelation(dataSource);
+		singleton[Dataset[Row]]._call("ofRows")(sparkSession, sr).asInstanceOf[Dataset[_]];
 	}
 
-	def asSparkStreamSource(ss: StreamSource, ctx: RunnerContext) = new SparkStreamSource() {
+	private def asSparkStreamSource(ss: StreamSource, ctx: RunnerContext) = new SparkStreamSource() {
 		override def schema: StructType = null;
 
 
@@ -56,44 +70,50 @@ case class DoWrite(sink: Sink, outputMode: OutputMode = OutputMode.Complete)
 	override def perform(input: Any, ctx: RunnerContext) {
 		val ds: Dataset[_] = input.asInstanceOf[Dataset[_]];
 		if (ds.isStreaming)
-			performStream(sink.asInstanceOf[StreamSink], ds, ctx);
+			saveStream(sink.asInstanceOf[StreamSink], ds, ctx);
 		else
-			performBatch(sink.asInstanceOf[BatchSink], ds, ctx);
+			saveBatch(sink.asInstanceOf[BatchSink], ds, ctx);
 	}
 
-	def performStream(ss: StreamSink, ds: Dataset[_], ctx: RunnerContext) {
+	//TODO: bad code here
+	def saveStream(ss: StreamSink, ds: Dataset[_], ctx: RunnerContext) {
 		val df = ds.toDF();
 		ss.init(outputMode, ctx);
-		val query = df.sparkSession._get("sessionState").
-			_get("streamingQueryManager").
-			_call("startQuery")(
-				DoWrite.getNextQueryId,
-				ctx("checkpointLocation").asInstanceOf[String],
-				df,
-				asSparkStreamSink(ss, ctx),
-				outputMode,
-				ss.useTempCheckpointLocation,
-				ss.recoverFromCheckpointLocation,
-				ProcessingTime(0) //start now
-			).asInstanceOf[StreamingQuery];
+
+		val sqm = df.sparkSession._get[SessionState]("sessionState").
+			_getLazy[StreamingQueryManager]("streamingQueryManager");
+
+		val query = sqm._call[StreamingQuery]("startQuery")(
+			Utils.getNextQueryId,
+			ctx("checkpointLocation").asInstanceOf[String],
+			df,
+			asSparkStreamSink(ss, ctx),
+			outputMode,
+			ss.useTempCheckpointLocation,
+			ss.recoverFromCheckpointLocation,
+			ProcessingTime(0) //start now
+		);
 
 		query.awaitTermination();
 	}
 
-	def asSparkStreamSink(ss: StreamSink, ctx: RunnerContext) = new SparkStreamSink() {
+	private def asSparkStreamSink(ss: StreamSink, ctx: RunnerContext) = new SparkStreamSink() {
 		def addBatch(batchId: Long, data: DataFrame): Unit = {
 			ss.addBatch(batchId, data);
 		}
 	}
 
-	def performBatch(bs: BatchSink, ds: Dataset[_], ctx: RunnerContext): Unit = {
+	def saveBatch(bs: BatchSink, ds: Dataset[_], ctx: RunnerContext): Unit = {
 		bs.init(outputMode, ctx);
 		bs.saveBatch(ds);
 	}
 }
 
-object DoWrite {
+private object Utils {
 	val queryId = new AtomicInteger(0);
+	val sourceId = new AtomicInteger(0);
+
+	def getNextStreamSourceName() = "stream-source-" + sourceId.incrementAndGet();
 
 	def getNextQueryId() = "query-" + queryId.incrementAndGet();
 }

@@ -32,6 +32,7 @@ class FlowGraph {
 	}
 
 	def show() {
+		//TODO: sort by dependencies
 		val data = graph.edges().toSeq
 			.map { pair: EndpointPair[Integer] ⇒
 				val startNodeId = pair.source();

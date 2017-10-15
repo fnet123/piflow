@@ -11,11 +11,11 @@ case class SeqAsSource[X: Encoder](t: X*) extends BatchSource {
 	override def toString = this.getClass.getSimpleName;
 	var _spark: SparkSession = null;
 
-	def init(ctx: RunnerContext): Unit = {
+	override def init(ctx: RunnerContext): Unit = {
 		_spark = ctx.forType[SparkSession];
 	}
 
-	def destroy() {}
+	override def destroy() {}
 
 	def loadDataset(): Dataset[X] = {
 		_spark.createDataset(t);

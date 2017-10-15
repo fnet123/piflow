@@ -1,6 +1,6 @@
 package cn.piflow.flow
 
-import cn.piflow.io.{SocketStreamSource, ConsoleSink}
+import cn.piflow.io.{StreamSource, SocketStreamSource, ConsoleSink}
 import cn.piflow.processor.ds.{AsDataSet, DoFlatMap, DoMap, DoTransform}
 import cn.piflow.processor.io.{DoLoad, DoWrite}
 import cn.piflow.util.MockNetCat
@@ -18,12 +18,10 @@ class StreamFlowTest {
 
 	import spark.implicits._
 
-	var nc: MockNetCat = MockNetCat.start(9999);
-
-	@Test
-	def testFlowSequence() = {
+	private def testFlowSequence(init: => StreamSource)(generateData: => Unit)(finalize: => Unit) = {
 		val fg = new FlowGraph();
-		val node1 = fg.createNode(DoLoad(SocketStreamSource("localhost", 9999)));
+		val ss = init;
+		val node1 = fg.createNode(DoLoad(ss));
 		val node2 = fg.createNode(AsDataSet[String]());
 		val node3 = fg.createNode(DoMap[String, String](_.toUpperCase()));
 		val node4 = fg.createNode(DoFlatMap[String, String](_.split(" ")));
@@ -39,10 +37,22 @@ class StreamFlowTest {
 		val runner = Runner.sparkRunner(spark);
 		runner.schedule(fg);
 
-		nc.writeData("hello\r\nworld\r\nbye\r\nworld\r\n");
+		generateData;
 		Thread.sleep(10000);
-
+		finalize;
 		runner.stop();
+	}
+
+	@Test
+	def testSocketStream(): Unit = {
+		var nc: MockNetCat = MockNetCat.start(9999);
+		testFlowSequence {
+			SocketStreamSource("localhost", 9999);
+		} {
+			nc.writeData("hello\r\nworld\r\nbye\r\nworld\r\n");
+		} {
+			nc.stop();
+		}
 	}
 }
 

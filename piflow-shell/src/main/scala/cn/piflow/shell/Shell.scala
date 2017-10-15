@@ -47,7 +47,7 @@ class Shell {
 		settings.usejavacp.value = true;
 		settings.debug.value = false;
 		repl.process(settings);
-		//FIXME: do not stop!!		
+		//FIXME: do not stop!! seperate server and shell
 		Runner.sparkRunner(null).stop();
 	}
 }

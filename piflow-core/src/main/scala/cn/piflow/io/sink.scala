@@ -6,9 +6,9 @@ import org.apache.spark.sql.execution.streaming.{LongOffset, Offset}
 import org.apache.spark.sql.streaming.OutputMode
 
 trait Sink {
-	def init(outputMode: OutputMode, ctx: RunnerContext);
+	def init(outputMode: OutputMode, ctx: RunnerContext): Unit = {}
 
-	def destroy();
+	def destroy(): Unit = {}
 }
 
 trait BatchSink extends Sink {
@@ -20,5 +20,5 @@ trait StreamSink extends Sink {
 
 	def useTempCheckpointLocation: Boolean = false;
 
-	def recoverFromCheckpointLocation = true;
+	def recoverFromCheckpointLocation: Boolean = true;
 }

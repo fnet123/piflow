@@ -89,7 +89,6 @@ abstract class ChainWithTail[Y](val current: Arrow[_], val successor: Arrow[Y])
 		//create processor nodes for each bound
 		val allNodes = collection.mutable.Map[BoundNode[_], FlowNode]();
 		involvedBounds.keys.foreach { bound: BoundNode[_] =>
-			//FIXME: append or overwrite
 			val node = flowGraph.createNode(bound.createProcessor());
 			bound.notifyRefs(node);
 			allNodes(bound) = node;

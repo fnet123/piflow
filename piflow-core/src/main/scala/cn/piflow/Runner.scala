@@ -8,10 +8,6 @@ import org.apache.spark.sql.SparkSession
 
 import scala.reflect.ClassTag
 
-trait Logging {
-	protected val logger = Logger.getLogger(this.getClass);
-}
-
 trait RunnerContext {
 	def apply[T](name: String): T;
 

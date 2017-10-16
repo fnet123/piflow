@@ -2,7 +2,7 @@ package cn.piflow
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import cn.piflow.processor.Processor
+import cn.piflow.Processor
 import cn.piflow.util.FormatUtils
 import com.google.common.graph.{EndpointPair, MutableValueGraph, ValueGraphBuilder}
 
@@ -26,7 +26,7 @@ class FlowGraph {
 	}
 
 	def link(thisNode: FlowNode, thatNode: FlowNode,
-					 portNamePair: (String, String) = ("_1", "_1")): FlowGraph = {
+	         portNamePair: (String, String) = ("_1", "_1")): FlowGraph = {
 		graph.putEdgeValue(thisNode.id, thatNode.id, portNamePair);
 		this;
 	}
@@ -47,4 +47,25 @@ class FlowGraph {
 	}
 
 	def node(id: Integer) = nodesMap(id);
+}
+
+trait Processor {
+
+	def init(ctx: RunnerContext): Unit = {}
+
+	def getInPortNames(): Seq[String];
+
+	def getOutPortNames(): Seq[String];
+
+	def performN2N(inputs: Map[String, _], ctx: RunnerContext): Map[String, _];
+
+	def DEFAULT_IN_PORT_NAMES(n: Int): Seq[String] = {
+		(1 to n).map("_" + _);
+	}
+
+	def DEFAULT_OUT_PORT_NAMES(n: Int): Seq[String] = {
+		(1 to n).map("_" + _);
+	}
+
+	def destroy(): Unit = {}
 }

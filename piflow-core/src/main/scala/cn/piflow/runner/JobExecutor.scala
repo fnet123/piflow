@@ -1,7 +1,6 @@
 package cn.piflow.runner
 
-import cn.piflow.processor.{Processor, ProcessorN2N}
-import cn.piflow.{FlowException, FlowGraph, Logging, RunnerContext}
+import cn.piflow._
 import org.apache.spark.sql.{SQLContext, SparkSession}
 
 import scala.collection.JavaConversions.asScalaSet
@@ -64,7 +63,7 @@ object JobExecutor extends Logging {
 			logger.debug(s"visiting node: $processor, node id: $nodeId");
 
 			try {
-				val outputs = ProcessorN2N.fromUnknown(processor).performN2N(inputs.toMap, ctx);
+				val outputs = processor.performN2N(inputs.toMap, ctx);
 				logger.debug(s"visited node: $processor, node id: $nodeId");
 				visitedNodes(nodeId) = outputs;
 				outputs;

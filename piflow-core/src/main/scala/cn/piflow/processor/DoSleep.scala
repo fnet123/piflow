@@ -8,7 +8,7 @@ import cn.piflow.RunnerContext
 	*         do nothing, just sleep, this class is for test use
 	*/
 case class DoSleep(sleepTime: Long) extends Processor020 {
-	def perform(ctx: RunnerContext) = {
+	def perform020(ctx: RunnerContext) = {
 		Thread.sleep(sleepTime);
 	}
 }

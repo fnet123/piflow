@@ -27,26 +27,26 @@ object ReflectUtils {
 
 class ReflectedObject(o: AnyRef) {
 	//employee._get("company.name")
-	def _get[T <: Any](name: String): T = {
+	def _get(name: String): AnyRef = {
 		var o2 = o;
 		for (fn <- name.split("\\.")) {
 			val field = o2.getClass.getDeclaredField(fn);
 			field.setAccessible(true);
 			o2 = field.get(o2);
 		}
-		o2.asInstanceOf[T];
+		o2;
 	}
 
-	def _getLazy[T <: Any](name: String): T = {
-		_call(s"${name}$$lzycompute")().asInstanceOf[T]
+	def _getLazy(name: String): AnyRef = {
+		_call(s"${name}$$lzycompute")();
 	}
 
-	def _call[T <: Any](name: String)(args: Any*): T = {
+	def _call(name: String)(args: Any*): AnyRef = {
 		//val method = o.getClass.getDeclaredMethod(name, args.map(_.getClass): _*);
 		//TODO: supports overloaded methods?
 		val methods = o.getClass.getDeclaredMethods.filter(_.getName.equals(name));
 		val method = methods(0);
 		method.setAccessible(true);
-		method.invoke(o, args.map(_.asInstanceOf[Object]): _*).asInstanceOf[T];
+		method.invoke(o, args.map(_.asInstanceOf[Object]): _*);
 	}
 }

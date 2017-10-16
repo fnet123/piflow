@@ -26,7 +26,7 @@ class JobManagerTest {
 		val node2 = fg.createNode(DoMap[Int, Int](_ + 1));
 		val node3 = fg.createNode(DoWrite(ConsoleSink()));
 		val node4 = fg.createNode(new Processor020() {
-			override def perform(ctx: RunnerContext) = {
+			override def perform020(ctx: RunnerContext) = {
 				Thread.sleep(3000);
 			}
 		});

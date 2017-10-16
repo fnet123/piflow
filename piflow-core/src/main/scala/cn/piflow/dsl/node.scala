@@ -2,7 +2,7 @@ package cn.piflow.dsl
 
 import cn.piflow.FlowNode
 import cn.piflow.io.{BatchSource, Sink}
-import cn.piflow.processor.Processor
+import cn.piflow.Processor
 import cn.piflow.processor.io.{DoLoad, DoWrite}
 import org.apache.spark.sql.streaming.OutputMode
 

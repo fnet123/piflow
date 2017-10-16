@@ -2,7 +2,7 @@ package cn.piflow.dsl
 
 import cn.piflow.FlowNode
 import cn.piflow.io.{BatchSource, Sink}
-import cn.piflow.processor.Processor
+import cn.piflow.Processor
 
 /**
 	* @author bluejoe2008@gmail.com

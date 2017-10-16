@@ -6,7 +6,6 @@ import cn.piflow.RunnerContext
 import cn.piflow.io._
 import cn.piflow.processor.{Processor021, Processor120}
 import cn.piflow.util.ReflectUtils._
-import com.sun.deploy.util.SessionState
 import org.apache.spark.sql._
 import org.apache.spark.sql.execution.datasources.DataSource
 import org.apache.spark.sql.execution.streaming.{Sink => SparkStreamSink, Source => SparkStreamSource, _}
@@ -19,7 +18,7 @@ import org.apache.spark.util.SystemClock
 	*/
 case class DoLoad(source: Source)
 	extends Processor021 {
-	override def perform(ctx: RunnerContext): Dataset[_] = {
+	override def perform021(ctx: RunnerContext): Dataset[_] = {
 		source match {
 			case bs: BatchSource => loadBatch(bs, ctx);
 			case ss: StreamSource => loadStream(ss, ctx);
@@ -43,7 +42,6 @@ case class DoLoad(source: Source)
 		}
 
 		val dataSource = new SparkDataSource();
-		val schema = StructType(Seq[StructField]());
 		val sr = StreamingRelation(dataSource);
 		singleton[Dataset[Row]]._call("ofRows")(sparkSession, sr).asInstanceOf[Dataset[_]];
 	}
@@ -68,7 +66,7 @@ case class DoLoad(source: Source)
 
 case class DoWrite(sink: Sink, outputMode: OutputMode = OutputMode.Complete)
 	extends Processor120 {
-	override def perform(input: Any, ctx: RunnerContext) {
+	override def perform120(input: Any, ctx: RunnerContext) {
 		val ds: Dataset[_] = input.asInstanceOf[Dataset[_]];
 		//stream comes from a StreamSource
 		if (ds.isStreaming)
@@ -82,10 +80,10 @@ case class DoWrite(sink: Sink, outputMode: OutputMode = OutputMode.Complete)
 		val df = ds.toDF();
 		ss.init(outputMode, ctx);
 
-		val sqm = df.sparkSession._get[SessionState]("sessionState").
-			_getLazy[StreamingQueryManager]("streamingQueryManager");
+		val sqm = df.sparkSession._get("sessionState").
+			_getLazy("streamingQueryManager");
 
-		val query = sqm._call[StreamingQuery]("startQuery")(
+		val query = sqm._call("startQuery")(
 			None, //Utils.getNextQueryId,
 			None, //ctx("checkpointLocation").asInstanceOf[String],
 			df,
@@ -97,7 +95,7 @@ case class DoWrite(sink: Sink, outputMode: OutputMode = OutputMode.Complete)
 			instanceOf("org.apache.spark.util.SystemClock")()
 		);
 
-		query.awaitTermination();
+		query.asInstanceOf[StreamingQuery].awaitTermination();
 	}
 
 	private def asSparkStreamSink(ss: StreamSink, ctx: RunnerContext) = new SparkStreamSink() {
@@ -118,6 +116,6 @@ private object Utils {
 
 	def getNextStreamSourceName() = "stream-source-" + sourceId.incrementAndGet();
 
-	//TODO: actually not used
+	//TODO: actually never used
 	def getNextQueryId() = "query-" + queryId.incrementAndGet();
 }

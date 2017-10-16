@@ -12,7 +12,7 @@ import scala.reflect.ClassTag
 case class DoMap[X: Encoder, Y: Encoder](fn: X ⇒ Y) extends Processor121 {
 	override def toString = this.getClass.getSimpleName;
 
-	def perform(input: Any, ctx: RunnerContext): Dataset[Y] = {
+	def perform121(input: Any, ctx: RunnerContext): Dataset[Y] = {
 		input.asInstanceOf[Dataset[X]].map(fn);
 	}
 }
@@ -20,7 +20,7 @@ case class DoMap[X: Encoder, Y: Encoder](fn: X ⇒ Y) extends Processor121 {
 case class AsDataSet[Y: Encoder]() extends Processor121 {
 	override def toString = this.getClass.getSimpleName;
 
-	def perform(input: Any, ctx: RunnerContext): Dataset[Y] = {
+	def perform121(input: Any, ctx: RunnerContext): Dataset[Y] = {
 		input.asInstanceOf[Dataset[_]].as[Y];
 	}
 }
@@ -28,7 +28,7 @@ case class AsDataSet[Y: Encoder]() extends Processor121 {
 case class AsDataFrame() extends Processor121 {
 	override def toString = this.getClass.getSimpleName;
 
-	def perform(input: Any, ctx: RunnerContext): DataFrame = {
+	def perform121(input: Any, ctx: RunnerContext): DataFrame = {
 		input.asInstanceOf[Dataset[_]].toDF;
 	}
 }
@@ -36,14 +36,14 @@ case class AsDataFrame() extends Processor121 {
 case class DoTransform[X, Y](fn: X ⇒ Y) extends Processor121 {
 	override def toString = this.getClass.getSimpleName;
 
-	def perform(input: Any, ctx: RunnerContext): Y = {
+	def perform121(input: Any, ctx: RunnerContext): Y = {
 		fn(input.asInstanceOf[X]);
 	}
 }
 
 case class DoFlatMap[X: Encoder, Y: Encoder](fn: X ⇒ TraversableOnce[Y])
 	extends Processor121 {
-	def perform(input: Any, ctx: RunnerContext): Dataset[Y] = {
+	def perform121(input: Any, ctx: RunnerContext): Dataset[Y] = {
 		input.asInstanceOf[Dataset[X]].flatMap(fn);
 	}
 }
@@ -51,7 +51,7 @@ case class DoFlatMap[X: Encoder, Y: Encoder](fn: X ⇒ TraversableOnce[Y])
 case class DoFilter[X: Encoder](fn: X ⇒ Boolean) extends Processor121 {
 	override def toString = this.getClass.getSimpleName;
 
-	def perform(input: Any, ctx: RunnerContext): Dataset[X] = {
+	def perform121(input: Any, ctx: RunnerContext): Dataset[X] = {
 		input.asInstanceOf[Dataset[X]].filter(fn);
 	}
 }
@@ -59,7 +59,7 @@ case class DoFilter[X: Encoder](fn: X ⇒ Boolean) extends Processor121 {
 case class DoGroupBy[X: Encoder](key: String) extends Processor121 {
 	override def toString = this.getClass.getSimpleName;
 
-	def perform(input: Any, ctx: RunnerContext): RelationalGroupedDataset = {
+	def perform121(input: Any, ctx: RunnerContext): RelationalGroupedDataset = {
 		input.asInstanceOf[Dataset[X]].groupBy(key);
 	}
 }
@@ -74,7 +74,7 @@ case class DoFork[X](conditions: (X ⇒ Boolean)*) extends Processor12N {
 
 	override def toString = this.getClass.getSimpleName;
 
-	def perform(input: Any, ctx: RunnerContext): Map[String, _] = {
+	def perform12N(input: Any, ctx: RunnerContext): Map[String, _] = {
 		val map = collection.mutable.Map[String, Dataset[Any]]();
 		val conditionsMap = getOutPortNames.zip(conditions);
 		conditionsMap.foreach { x ⇒
@@ -88,7 +88,7 @@ case class DoFork[X](conditions: (X ⇒ Boolean)*) extends Processor12N {
 }
 
 case class DoZip[X: Encoder, Y: Encoder]()(implicit ct: ClassTag[Y], en: Encoder[(X, Y)]) extends ProcessorN21 {
-	def perform(inputs: Map[String, _], ctx: RunnerContext): Dataset[(X, Y)] = {
+	def performN21(inputs: Map[String, _], ctx: RunnerContext): Dataset[(X, Y)] = {
 		val ds1: Dataset[X] = inputs(getInPortNames().head).asInstanceOf[Dataset[X]];
 		val ds2: Dataset[Y] = inputs(getInPortNames()(1)).asInstanceOf[Dataset[Y]];
 		ds1.sparkSession.createDataset(ds1.rdd.zip(ds2.rdd));
@@ -98,7 +98,7 @@ case class DoZip[X: Encoder, Y: Encoder]()(implicit ct: ClassTag[Y], en: Encoder
 }
 
 case class DoMerge[X: Encoder]() extends ProcessorN21 {
-	def perform(inputs: Map[String, _], ctx: RunnerContext): Dataset[X] = {
+	def performN21(inputs: Map[String, _], ctx: RunnerContext): Dataset[X] = {
 		inputs(getInPortNames().head).asInstanceOf[Dataset[X]]
 			.union(inputs(getInPortNames()(1)).asInstanceOf[Dataset[X]]);
 	}

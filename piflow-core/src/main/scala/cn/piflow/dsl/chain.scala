@@ -1,7 +1,7 @@
 package cn.piflow.dsl
 
 import cn.piflow.io.{BatchSource, Sink}
-import cn.piflow.processor.Processor
+import cn.piflow.Processor
 import cn.piflow.{FlowGraph, FlowNode}
 import org.apache.spark.sql.streaming.OutputMode
 

@@ -82,6 +82,7 @@ abstract class ChainWithTail[Y](val current: Arrow[_], val successor: Arrow[Y])
 	override def tail(): Arrow[Y] = successor;
 
 	def bindFlowGraph(flowGraph: FlowGraph) {
+		//TODO: sort nodes by dependencies
 		//calculates all involved bounds
 		val involvedBounds = collection.mutable.Map[BoundNode[_], Object]();
 		visitBound(current.node, involvedBounds);

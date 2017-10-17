@@ -1,6 +1,6 @@
 package cn.piflow.io
 
-import cn.piflow.RunnerContext
+import cn.piflow.JobContext
 import org.apache.spark.sql._
 import org.apache.spark.sql.execution.streaming.{ConsoleSink => SparkConsoleSink, MemorySink => SparkMemorySink}
 import org.apache.spark.sql.streaming.OutputMode
@@ -10,7 +10,7 @@ import org.apache.spark.sql.streaming.OutputMode
 	*/
 case class MemorySink() extends SparkStreamSinkAdapter
 	with BatchSink with StreamSink {
-	def createSparkStreamSink(outputMode: OutputMode, ctx: RunnerContext) = new SparkMemorySink(null, outputMode);
+	def createSparkStreamSink(outputMode: OutputMode, ctx: JobContext) = new SparkMemorySink(null, outputMode);
 
 	override def writeBatch(ds: Dataset[_]) = {
 		writeBatch(-1, ds.toDF());

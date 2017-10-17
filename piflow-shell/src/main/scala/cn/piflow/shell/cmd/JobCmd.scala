@@ -57,7 +57,7 @@ class JobCmd(runner: Runner) extends Cmd {
 	private def printInstances(jobs: Seq[JobInstance]) = {
 		val data = jobs.map { ji: JobInstance ⇒
 			val sj = ji.getScheduledJob();
-			Seq(ji.getId(), sj.getId(), FormatUtils.formatDate(ji.getStartTime()), ji.getRunTime());
+			Seq(ji.getId(), sj.getId(), FormatUtils.format(ji.getStartTime()), ji.getRunTime());
 		}
 
 		FormatUtils.printTable(Seq("id", "sid", "start-time", "run-time"), data, "");
@@ -88,9 +88,9 @@ class JobCmd(runner: Runner) extends Cmd {
 	def listScheduledJobs() = {
 		val jm = runner.getJobManager();
 		val data = jm.getScheduledJobs().map { sj: ScheduledJob ⇒
-			Seq(sj.getId(), FormatUtils.formatDate(sj.getStartTime()),
-				jm.getFireCount(sj.getId()), FormatUtils.formatDate(sj.getPreviousFireTime()),
-				FormatUtils.formatDate(sj.getNextFireTime()));
+			Seq(sj.getId(), FormatUtils.format(sj.getStartTime()),
+				jm.getFireCount(sj.getId()), FormatUtils.format(sj.getPreviousFireTime()),
+				FormatUtils.format(sj.getNextFireTime()));
 		}
 
 		FormatUtils.printTable(Seq("sid", "start-time", "run-times", "previous-fire", "next-fire"), data, "");

@@ -52,7 +52,7 @@ class RunnableFlowGraph(flowGraph: FlowGraph)(implicit runner: Runner) {
 
 	private def printScheduledJobInfo(job: ScheduledJob) = {
 		val jobId = job.getId();
-		val nftime = FormatUtils.formatDate(job.getNextFireTime());
+		val nftime = FormatUtils.format(job.getNextFireTime());
 		println(s"job scheduled: id=$jobId, next fired time=$nftime");
 	}
 

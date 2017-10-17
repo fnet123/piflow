@@ -1,6 +1,6 @@
 package cn.piflow.io
 
-import cn.piflow.RunnerContext
+import cn.piflow.JobContext
 import org.apache.spark.sql.{Dataset, Encoder, SparkSession}
 
 /**
@@ -11,8 +11,8 @@ case class SeqAsSource[X: Encoder](t: X*) extends BatchSource {
 	override def toString = this.getClass.getSimpleName;
 	var _spark: SparkSession = null;
 
-	override def init(ctx: RunnerContext): Unit = {
-		_spark = ctx.forType[SparkSession];
+	override def init(ctx: JobContext): Unit = {
+		_spark = ctx.sparkSession();
 	}
 
 	override def destroy() {}

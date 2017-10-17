@@ -1,6 +1,6 @@
 package cn.piflow.io
 
-import cn.piflow.RunnerContext
+import cn.piflow.JobContext
 import org.apache.spark.sql.{SQLContext, Dataset}
 import org.apache.spark.sql.execution.datasources.jdbc.JdbcRelationProvider
 import org.apache.spark.sql.streaming.OutputMode
@@ -17,8 +17,8 @@ class JdbcTableSink(parameters: Map[String, String]) extends BatchSink {
 
 	var _outputMode: OutputMode = null;
 
-	override def init(outputMode: OutputMode, ctx: RunnerContext) = {
-		_sqlContext = ctx.forType[SQLContext];
+	override def init(outputMode: OutputMode, ctx: JobContext) = {
+		_sqlContext = ctx.sqlContext();
 		_outputMode = outputMode;
 	}
 

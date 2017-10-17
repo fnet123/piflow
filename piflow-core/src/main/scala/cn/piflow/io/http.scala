@@ -1,6 +1,6 @@
 package cn.piflow.io
 
-import cn.piflow.RunnerContext
+import cn.piflow.JobContext
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.streaming.OutputMode
 import org.apache.spark.sql.execution.streaming.http.{HttpStreamSource => SparkHttpStreamSource}
@@ -15,8 +15,8 @@ case class HttpStreamSource(httpServletUrl: String,
                             includesTimestamp: Boolean = false,
                             timestampColumnName: String = "_TIMESTAMP_")
 	extends SparkStreamSourceAdapter with StreamSource {
-	def createSparkStreamSource(ctx: RunnerContext): SparkHttpStreamSource =
-		new SparkHttpStreamSource(ctx.forType[SQLContext],
+	def createSparkStreamSource(ctx: JobContext): SparkHttpStreamSource =
+		new SparkHttpStreamSource(ctx.sqlContext(),
 			httpServletUrl,
 			topic,
 			msPollingPeriod,
@@ -26,7 +26,7 @@ case class HttpStreamSource(httpServletUrl: String,
 
 case class HttpStreamSink(httpPostURL: String, topic: String, maxPacketSize: Int = 10 * 1024 * 1024)
 	extends SparkStreamSinkAdapter with StreamSink {
-	def createSparkStreamSink(outputMode: OutputMode, ctx: RunnerContext) =
+	def createSparkStreamSink(outputMode: OutputMode, ctx: JobContext) =
 		new SparkHttpStreamSink(httpPostURL, topic, maxPacketSize);
 
 }

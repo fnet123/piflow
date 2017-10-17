@@ -1,6 +1,6 @@
 package cn.piflow.io
 
-import cn.piflow.RunnerContext
+import cn.piflow.JobContext
 import org.apache.spark.sql.execution.datasources.json.JsonFileFormat
 import org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat
 import org.apache.spark.sql.execution.datasources.text.TextFileFormat
@@ -45,8 +45,8 @@ trait FileFormat {
 
 case class FileStreamSink(path: String, fileFormat: FileFormat, partitionColumnNames: Seq[String] = Seq[String]())
 	extends SparkStreamSinkAdapter with StreamSink {
-	override def createSparkStreamSink(outputMode: OutputMode, ctx: RunnerContext) =
-		new SparkFileStreamSink(ctx.forType[SparkSession],
+	override def createSparkStreamSink(outputMode: OutputMode, ctx: JobContext) =
+		new SparkFileStreamSink(ctx.sparkSession(),
 			path,
 			fileFormat.create(),
 			partitionColumnNames,

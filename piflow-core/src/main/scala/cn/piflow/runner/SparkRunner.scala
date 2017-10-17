@@ -14,15 +14,17 @@ import scala.collection.JavaConversions.mapAsScalaMap
 object SparkRunner extends Runner with Logging {
 	val quartzScheduler = StdSchedulerFactory.getDefaultScheduler();
 	val teg: TriggerExtraGroup = new TriggerExtraGroupImpl();
-	val schedulerListener = new SchedulerListenerImpl(teg);
+	val schedulerListener = new QuartzSchedulerListenerImpl(teg);
 	quartzScheduler.getListenerManager.addSchedulerListener(schedulerListener);
 	//quartzScheduler.getListenerManager.addJobListener(new FlowGraphJobListener());
-	val triggerListener = new TriggerListenerImpl(teg);
-	val jobManager = new JobManagerImpl(quartzScheduler, teg);
+	val triggerListener = new QuartzTriggerListenerImpl(teg);
+	val jobManager = new FlowJobManagerImpl(quartzScheduler, teg);
 	quartzScheduler.getListenerManager.addTriggerListener(triggerListener);
 	quartzScheduler.start();
 
 	val jobId = new AtomicInteger(0);
+
+	def getStatManager(): StatManager = jobManager;
 
 	def getJobManager(): JobManager = jobManager;
 
@@ -34,7 +36,7 @@ object SparkRunner extends Runner with Logging {
 	}
 
 	def run(flowGraph: FlowGraph, timeout: Long = 0): ScheduledJob = {
-		val sj = schedule(flowGraph).asInstanceOf[ScheduledJobImpl];
+		val sj = schedule(flowGraph).asInstanceOf[FlowScheduledJobImpl];
 		val key = sj.trigger.getKey;
 
 		teg.get(key).awaitTermination(if (timeout > 0) {
@@ -63,7 +65,10 @@ object SparkRunner extends Runner with Logging {
 		val jobDetail =
 			JobBuilder.newJob(classOf[FlowGraphJob])
 				.build();
-		jobDetail.getJobDataMap.put(classOf[FlowGraph].getName, flowGraph);
+
+		//TODO: persistence?
+		jobDetail.getJobDataMap.put("flowGraph", flowGraph);
+		jobDetail.getJobDataMap.put("jobManager", jobManager);
 
 		val triggerId = "" + jobId.incrementAndGet();
 		val triggerBuilder = TriggerBuilder
@@ -81,7 +86,7 @@ object SparkRunner extends Runner with Logging {
 		val trigger = triggerBuilder.build();
 
 		quartzScheduler.scheduleJob(jobDetail, trigger);
-		new ScheduledJobImpl(jobDetail, trigger);
+		new FlowScheduledJobImpl(jobDetail, trigger);
 	}
 
 	private def validate(flowGraph: FlowGraph) {
@@ -93,7 +98,9 @@ object SparkRunner extends Runner with Logging {
 class FlowGraphJob extends Job with Logging {
 	override def execute(ctx: JobExecutionContext) = {
 		val map = ctx.getJobDetail.getJobDataMap;
-		val flowGraph = map(classOf[FlowGraph].getName).asInstanceOf[FlowGraph];
-		JobExecutor.executeFlowGraph(flowGraph);
+		val flowGraph = map("flowGraph").asInstanceOf[FlowGraph];
+		val jobManager = map("jobManager").asInstanceOf[FlowJobManagerImpl];
+
+		FlowJobExecutor.executeFlowGraph(flowGraph, jobManager, ctx);
 	}
 }

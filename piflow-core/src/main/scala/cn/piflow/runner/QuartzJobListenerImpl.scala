@@ -6,7 +6,7 @@ import org.quartz.{JobExecutionContext, JobExecutionException => QuartzJobExecut
 /**
 	* @author bluejoe2008@gmail.com
 	*/
-class JobListenerImpl() extends JobListener with Logging {
+class QuartzJobListenerImpl() extends JobListener with Logging {
 	def getName() = this.getClass.getName;
 
 	def jobToBeExecuted(context: JobExecutionContext) {
@@ -17,7 +17,7 @@ class JobListenerImpl() extends JobListener with Logging {
 	}
 
 	def jobWasExecuted(context: JobExecutionContext,
-										 jobException: QuartzJobExecutionException) {
+	                   jobException: QuartzJobExecutionException) {
 		logger.debug(String.format("job executed: %s, scheduledJob: %s", context.getFireInstanceId, context.getTrigger.getKey.getName));
 	}
 }

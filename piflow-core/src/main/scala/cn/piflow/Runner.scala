@@ -4,23 +4,45 @@ import java.util.Date
 
 import cn.piflow.runner.SparkRunner
 import org.apache.log4j.Logger
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{SQLContext, SparkSession}
 
 import scala.reflect.ClassTag
 
+trait FlowGraphEvent {
+
+}
+
 trait RunnerContext {
-	def apply[T](name: String): T;
+	def arg[T](name: String): T;
 
-	def isDefined(name: String): Boolean;
+	def sparkSession: SparkSession;
 
-	def forType[T: ClassTag](implicit m: Manifest[T]): T =
-		apply(m.runtimeClass.getName);
+	def sqlContext: SQLContext;
 
-	def update[T](name: String, value: T);
+	def argForType[T: ClassTag](implicit m: Manifest[T]): T =
+		arg(m.runtimeClass.getName);
+
+	def arg[T](name: String, value: T): this.type;
+}
+
+trait JobContext extends RunnerContext {
+	def flowGraph: FlowGraph;
+
+	def jobInstanceId: String;
+
+	def notifyEvent(event: FlowGraphEvent);
+}
+
+trait ProcessorContext extends JobContext {
+	def jobContext: JobContext;
+
+	def flowNodeId: Int;
 }
 
 trait Runner {
 	def getJobManager(): JobManager;
+
+	def getStatManager(): StatManager;
 
 	def schedule(flowGraph: FlowGraph, schedule: JobSchedule): ScheduledJob;
 
@@ -36,6 +58,10 @@ trait Runner {
 
 object Runner {
 	def sparkRunner(spark: SparkSession) = SparkRunner;
+}
+
+trait StatManager {
+	def getStat(jobId: String): FlowJobStat;
 }
 
 trait JobManager {

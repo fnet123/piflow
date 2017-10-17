@@ -1,7 +1,6 @@
 package cn.piflow
 
 import cn.piflow.io.{BatchSource, Sink}
-import cn.piflow.Processor
 
 package object dsl {
 	//convert source/sink/processor to Named first

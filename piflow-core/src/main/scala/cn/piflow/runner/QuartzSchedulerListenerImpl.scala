@@ -6,7 +6,7 @@ import org.quartz.{JobDetail, JobKey, SchedulerException, SchedulerListener, Tri
 /**
 	* @author bluejoe2008@gmail.com
 	*/
-class SchedulerListenerImpl(teg: TriggerExtraGroup) extends SchedulerListener with Logging {
+class QuartzSchedulerListenerImpl(teg: TriggerExtraGroup) extends SchedulerListener with Logging {
 	def jobScheduled(trigger: Trigger) {
 		teg.getOrCreate(trigger.getKey);
 		logger.debug(String.format("job scheduled: %s", trigger.getKey.getName));
@@ -19,6 +19,7 @@ class SchedulerListenerImpl(teg: TriggerExtraGroup) extends SchedulerListener wi
 	def triggerFinalized(trigger: Trigger) {
 		teg.get(trigger.getKey).notifyTermination();
 		logger.debug(String.format("job finalized: %s", trigger.getKey.getName));
+
 		//do not logout: historic records
 		//teg.logout(trigger.getKey);
 	}

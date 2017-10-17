@@ -1,5 +1,7 @@
 package cn.piflow.io
 
+import java.util.concurrent.atomic.AtomicInteger
+
 import org.apache.spark.sql.SparkSession
 import org.junit.Test
 
@@ -13,6 +15,22 @@ class SparkTest {
 	import spark.implicits._
 
 	@Test
+	def test1() = {
+		val ds = Seq(1, 2, 3).toDS()
+		val counter1 = new AtomicInteger(0);
+		val counter2 = new AtomicInteger(0);
+
+		ds.map { (x: Int) =>
+			val t = x + 1;
+			println(t);
+			t;
+		}.map((x: Int) => {
+			val t = x * 2;
+			println(t);
+			t;
+		}).show();
+	}
+
 	def testIO() = {
 		val peopleDF = spark.read.format("json").load("examples/src/main/resources/people.json")
 		peopleDF.select("name", "age").write.format("parquet").save("namesAndAges.parquet")
@@ -37,7 +55,6 @@ class SparkTest {
 			.save()
 	}
 
-	@Test
 	def testStreamIO(): Unit = {
 		val lines = spark.readStream
 			.format("socket")

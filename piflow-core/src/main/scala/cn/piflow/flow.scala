@@ -1,8 +1,7 @@
 package cn.piflow
 
 import java.util.concurrent.atomic.AtomicInteger
-
-import cn.piflow.Processor
+import cn.piflow.runner.{ProcessorEvent, EventFromProcessor}
 import cn.piflow.util.FormatUtils
 import com.google.common.graph.{EndpointPair, MutableValueGraph, ValueGraphBuilder}
 
@@ -14,6 +13,7 @@ class FlowNode(val id: Int, val processor: Processor) {
 class FlowGraph {
 	val graph: MutableValueGraph[Integer, (String, String)] =
 		ValueGraphBuilder.directed().build();
+
 	val nodesMap = collection.mutable.Map[Integer, FlowNode]();
 	val nodeId = new AtomicInteger(0);
 
@@ -32,7 +32,6 @@ class FlowGraph {
 	}
 
 	def show() {
-		//TODO: sort by dependencies
 		val data = graph.edges().toSeq
 			.map { pair: EndpointPair[Integer] ⇒
 				val startNodeId = pair.source();
@@ -40,8 +39,8 @@ class FlowGraph {
 				val startNode = node(startNodeId).processor.toString();
 				val endNode = node(endNodeId).processor.toString();
 				val (lable1, lable2) = graph.edgeValue(startNodeId, endNodeId).get;
-				Seq[Any](s"$startNodeId->$endNodeId", s"$startNode", lable1, lable2, s"$endNode");
-			}
+				Seq[Any](startNodeId -> endNodeId, s"$startNodeId->$endNodeId", startNode, lable1, lable2, endNode)
+			}.sortBy(_.apply(0).asInstanceOf[(Int, Int)]).map(_.drop(1));
 
 		FormatUtils.printTable(Seq("", "source node", "out port", "in port", "target node"), data);
 	}
@@ -50,14 +49,22 @@ class FlowGraph {
 }
 
 trait Processor {
+	protected var _processorContext: ProcessorContext = null;
 
-	def init(ctx: RunnerContext): Unit = {}
+	def context = _processorContext;
+
+	def notifyEvent(event: ProcessorEvent) = _processorContext.notifyEvent(
+		EventFromProcessor(_processorContext.flowNodeId, event));
+
+	def init(ctx: ProcessorContext): Unit = {
+		_processorContext = ctx;
+	}
 
 	def getInPortNames(): Seq[String];
 
 	def getOutPortNames(): Seq[String];
 
-	def performN2N(inputs: Map[String, _], ctx: RunnerContext): Map[String, _];
+	def performN2N(inputs: Map[String, _]): Map[String, _];
 
 	def DEFAULT_IN_PORT_NAMES(n: Int): Seq[String] = {
 		(1 to n).map("_" + _);

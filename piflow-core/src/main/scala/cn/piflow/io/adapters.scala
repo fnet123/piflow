@@ -1,6 +1,6 @@
 package cn.piflow.io
 
-import cn.piflow.RunnerContext
+import cn.piflow.JobContext
 import org.apache.spark.sql._
 import org.apache.spark.sql.execution.datasources.DataSource
 import org.apache.spark.sql.streaming.{DataStreamReader, OutputMode}
@@ -16,7 +16,7 @@ abstract class SparkSinkAdapter extends BatchSink {
 
 	var _outputMode: OutputMode = null;
 
-	override def init(outputMode: OutputMode, ctx: RunnerContext): Unit = {
+	override def init(outputMode: OutputMode, ctx: JobContext): Unit = {
 		_outputMode = outputMode;
 	}
 
@@ -35,8 +35,8 @@ abstract class SparkSourceAdapter extends BatchSource {
 
 	var _spark: SparkSession = null;
 
-	override def init(ctx: RunnerContext): Unit = {
-		_spark = ctx.forType[SparkSession];
+	override def init(ctx: JobContext): Unit = {
+		_spark = ctx.sparkSession();
 	}
 
 	def loadBatch(): Dataset[_] = {
@@ -50,10 +50,10 @@ abstract class SparkSourceAdapter extends BatchSource {
 }
 
 abstract class SparkStreamSinkAdapter extends StreamSink {
-	def createSparkStreamSink(outputMode: OutputMode, ctx: RunnerContext): SparkStreamSink;
+	def createSparkStreamSink(outputMode: OutputMode, ctx: JobContext): SparkStreamSink;
 	var _sparkStreamSink: SparkStreamSink = null;
 
-	override def init(outputMode: OutputMode, ctx: RunnerContext): Unit = {
+	override def init(outputMode: OutputMode, ctx: JobContext): Unit = {
 		_sparkStreamSink = createSparkStreamSink(outputMode, ctx);
 	}
 
@@ -67,12 +67,12 @@ abstract class SparkStreamSinkAdapter extends StreamSink {
 }
 
 abstract class SparkStreamSourceAdapter extends StreamSource {
-	def createSparkStreamSource(ctx: RunnerContext): SparkStreamSource;
+	def createSparkStreamSource(ctx: JobContext): SparkStreamSource;
 	var _sparkStreamSource: SparkStreamSource = null;
 
 	override def schema(): StructType = _sparkStreamSource.schema;
 
-	override def init(ctx: RunnerContext) = {
+	override def init(ctx: JobContext) = {
 		_sparkStreamSource = createSparkStreamSource(ctx);
 	}
 

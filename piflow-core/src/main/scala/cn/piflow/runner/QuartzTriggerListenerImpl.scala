@@ -7,7 +7,7 @@ import org.quartz.{JobExecutionContext, Trigger, TriggerListener}
 /**
 	* @author bluejoe2008@gmail.com
 	*/
-class TriggerListenerImpl(teg: TriggerExtraGroup) extends TriggerListener with Logging {
+class QuartzTriggerListenerImpl(teg: TriggerExtraGroup) extends TriggerListener with Logging {
 	def getName() = this.getClass.getName;
 
 	def triggerFired(trigger: Trigger, context: JobExecutionContext) = {
@@ -23,7 +23,7 @@ class TriggerListenerImpl(teg: TriggerExtraGroup) extends TriggerListener with L
 	}
 
 	def triggerComplete(trigger: Trigger, context: JobExecutionContext,
-											triggerInstructionCode: CompletedExecutionInstruction) {
+	                    triggerInstructionCode: CompletedExecutionInstruction) {
 		teg.appendExecution(context);
 		logger.debug(String.format("job completed: %s, scheduledJob: %s", context.getFireInstanceId, trigger.getKey.getName));
 	}

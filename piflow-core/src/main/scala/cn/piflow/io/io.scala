@@ -1,6 +1,6 @@
 package cn.piflow.io
 
-import cn.piflow.RunnerContext
+import cn.piflow.JobContext
 import org.apache.spark.sql._
 import org.apache.spark.sql.execution.streaming.{LongOffset, Offset}
 import org.apache.spark.sql.streaming.OutputMode
@@ -9,7 +9,7 @@ import org.apache.spark.sql.types.StructType
 //////////////source//////////////
 
 trait Source {
-	def init(ctx: RunnerContext): Unit = {}
+	def init(ctx: JobContext): Unit = {}
 
 	def destroy(): Unit = {}
 }
@@ -29,7 +29,7 @@ trait StreamSource extends Source {
 ////////////// sink //////////////
 
 trait Sink {
-	def init(outputMode: OutputMode, ctx: RunnerContext): Unit = {}
+	def init(outputMode: OutputMode, ctx: JobContext): Unit = {}
 
 	def destroy(): Unit = {}
 }
